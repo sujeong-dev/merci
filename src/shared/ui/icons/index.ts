@@ -1,0 +1,15 @@
+export { PlayIcon } from './PlayIcon';
+export { PauseIcon } from './PauseIcon';
+export { StopIcon } from './StopIcon';
+export { PlusIcon } from './PlusIcon';
+export { MicIcon } from './MicIcon';
+export { CommentIcon } from './CommentIcon';
+export { CopyIcon } from './CopyIcon';
+export { ChevronLeftIcon } from './ChevronLeftIcon';
+export { ChevronDownIcon } from './ChevronDownIcon';
+export { ChevronUpIcon } from './ChevronUpIcon';
+export { WarningIcon } from './WarningIcon';
+export { AddPictureIcon } from './AddPictureIcon';
+export { SettingsIcon } from './SettingsIcon';
+export { MoreIcon } from './MoreIcon';
+export { CheckIcon } from './CheckIcon';
