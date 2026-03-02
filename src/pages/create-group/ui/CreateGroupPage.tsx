@@ -1,4 +1,8 @@
+'use client';
+
+import { useState } from 'react';
 import { Button, Input, PageHeader } from '@/shared/ui';
+import { GroupCreatedModal } from './GroupCreatedModal';
 
 /**
  * 가족 그룹 만들기 — 어르신 성함 입력
@@ -7,13 +11,15 @@ import { Button, Input, PageHeader } from '@/shared/ui';
  * - 헤더: 뒤로가기 + 중앙 타이틀 (PageHeader)
  * - 본문: 안내 문구 + 성함 입력 필드 (Input)
  * - 하단: 확인 버튼 fixed (Button primary)
+ * - 확인 버튼 → GroupCreatedModal 표시
  *
  * ## RSC 전략
- * 페이지는 Server Component로 유지합니다.
- * PageHeader가 'use client'로 내부적으로 router.back()을 처리하므로
- * 이 페이지에서 함수 prop을 넘길 필요가 없습니다.
+ * 모달 open 상태(useState) 관리가 필요하므로 Client Component입니다.
+ * PageHeader는 'use client' 내부 컴포넌트이므로 함수 prop 없이 사용 가능합니다.
  */
 export function CreateGroupPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="flex min-h-dvh flex-col bg-bg-base">
 
@@ -49,10 +55,23 @@ export function CreateGroupPage() {
           피그마 Container(6:678): 327×60px, x=24, y=708
           Button(6:679): fill #333333 (primary), radius 10px   */}
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-11">
-        <Button type="button" variant="primary" fullWidth className="h-[60px]">
+        <Button
+          type="button"
+          variant="primary"
+          fullWidth
+          className="h-[60px]"
+          onClick={() => setIsModalOpen(true)}
+        >
           확인
         </Button>
       </div>
+
+      {/* 그룹 생성 완료 모달 — node 6:1080 */}
+      <GroupCreatedModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        inviteCode="MC-7294-AZ"
+      />
 
     </div>
   );

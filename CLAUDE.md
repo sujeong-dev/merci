@@ -164,6 +164,48 @@ export function LandingPage() {
 
 ---
 
+### 마크업 전 공통 컴포넌트 확인 체크리스트 ⚠️
+
+**새 페이지/UI 마크업을 시작하기 전 반드시 아래 순서로 재사용 가능한 요소를 먼저 확인합니다.**
+직접 구현 전 기존 자산을 활용해 중복을 방지하고 일관성을 유지하세요.
+
+#### 확인 순서
+
+```
+1. app/globals.css  → typography-* 유틸리티 존재 여부 확인
+   (typography-modal-title, typography-caption-spaced 등 피그마 텍스트 스타일)
+
+2. src/shared/ui/   → 재사용 가능한 컴포넌트 확인
+   Button, Input, PageHeader, CardButton, SocialLoginButton,
+   Tab, Accordion, Select, Dropdown, IconButton, ProgressBar, PhotoReaction
+
+3. src/shared/ui/icons/ → 아이콘 확인
+   CopyIcon, ChevronRightIcon, ChevronLeftIcon, PlusIcon, CheckIcon 등
+
+4. 디자인 토큰      → 색상·간격이 Tailwind 유틸리티로 표현 가능한지 확인
+   text-text-*, bg-bg-*, border-border-*, shadow-sm/md/lg
+```
+
+#### 재사용 예시
+
+```tsx
+// ✅ 기존 SocialLoginButton 재사용 (children으로 텍스트 오버라이드)
+import { SocialLoginButton } from '@/shared/ui';
+<SocialLoginButton variant="kakao" className="rounded-[10px] h-auto py-4">
+  카카오로 초대 공유하기
+</SocialLoginButton>
+
+// ✅ 기존 아이콘 재사용
+import { CopyIcon } from '@/shared/ui/icons';
+<CopyIcon className="text-text-tertiary" />
+
+// ✅ 기존 typography 유틸리티 재사용
+<h2 className="typography-modal-title text-text-primary">제목</h2>
+<span className="typography-caption-spaced text-text-tertiary">라벨</span>
+```
+
+---
+
 ### 컴포넌트 분리 지침 ⚠️
 
 마크업 작업 중 **반복되는 구조**가 발견되면 FSD 레이어 기준에 맞게 컴포넌트로 즉시 분리합니다.
