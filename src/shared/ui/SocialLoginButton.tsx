@@ -47,9 +47,11 @@ const config = {
 
 interface SocialLoginButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant: 'kakao' | 'naver';
+  /** 버튼 텍스트. 미지정 시 variant별 기본 텍스트 사용 */
+  children?: React.ReactNode;
 }
 
-export function SocialLoginButton({ variant, className, ...props }: SocialLoginButtonProps) {
+export function SocialLoginButton({ variant, className, children, ...props }: SocialLoginButtonProps) {
   const { bg, logo: Logo, label, textColor } = config[variant];
 
   return (
@@ -62,7 +64,7 @@ export function SocialLoginButton({ variant, className, ...props }: SocialLoginB
       {...props}
     >
       <Logo />
-      <span className={cn('typography-section-title', textColor)}>{label}</span>
+      <span className={cn('typography-section-title', textColor)}>{children ?? label}</span>
     </button>
   );
 }

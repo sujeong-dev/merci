@@ -54,21 +54,24 @@ import { cn } from '@/shared/lib/utils';
 > **Next.js App Router + FSD 폴더 구조 안내**
 > - `app/`은 Next.js App Router 전용으로 루트에 위치합니다. (Next.js 요구사항)
 > - FSD 레이어(shared, entities, features, widgets)는 `src/` 하위에 위치합니다.
-> - `pages/`는 **FSD pages 레이어**로 루트에 위치합니다. Next.js Pages Router가 아닙니다. (`pages/README.md` 참고)
+> - FSD **pages 레이어**는 `src/pages/` 에 위치합니다. Next.js Pages Router가 아닙니다.
 > - `tsconfig.json`의 `@/*`는 `./src/*`로 설정되어 있습니다. (`@/shared/ui/...` → `src/shared/ui/...`)
 
 ```
 merci/
 ├── app/              # Next.js App Router (루트 고정, 라우팅 진입점만)
-│   ├── page.tsx
+│   ├── page.tsx           # → src/pages/landing/ui/LandingPage.tsx import
+│   ├── [route]/page.tsx   # → src/pages/[route]/ui/[Route]Page.tsx import
 │   ├── layout.tsx
 │   ├── globals.css
 │   └── design-tokens.css   # 자동생성, 수정 금지
 │
-├── pages/            # FSD pages 레이어 (⚠️ Next.js Pages Router 아님)
-│   └── README.md
-│
 ├── src/              # FSD 레이어 루트 (@/* alias 기준)
+│   ├── pages/        # FSD pages 레이어 (실제 페이지 마크업 위치)
+│   │   └── [page-name]/
+│   │       └── ui/
+│   │           └── [PageName]Page.tsx
+│   │
 │   ├── shared/
 │   │   ├── ui/       # 디자인 시스템 기본 단위 컴포넌트
 │   │   └── lib/      # 유틸리티 (utils.ts 등)
@@ -96,6 +99,33 @@ merci/
 │
 └── public/           # 정적 파일
 ```
+
+### 페이지 마크업 규칙 ⚠️
+
+**실제 페이지 마크업은 반드시 `src/pages/`에 위치해야 합니다.**
+
+`app/` 디렉토리의 `page.tsx`는 라우팅 진입점 역할만 하며, `src/pages/`의 페이지 컴포넌트를 import하여 렌더링합니다.
+
+```tsx
+// ✅ app/page.tsx (진입점만)
+import { LandingPage } from '@/pages/landing/ui/LandingPage';
+export default function Page() {
+  return <LandingPage />;
+}
+
+// ✅ src/pages/landing/ui/LandingPage.tsx (실제 마크업)
+export function LandingPage() {
+  return <main>...</main>;
+}
+
+// ❌ app/page.tsx에 직접 마크업 금지
+```
+
+**파일 경로 규칙:**
+- 페이지 컴포넌트: `src/pages/[페이지명]/ui/[페이지명]Page.tsx`
+- Next.js 진입점: `app/[라우트]/page.tsx` → import만 함
+
+---
 
 ### 레이어별 핵심 규칙
 
