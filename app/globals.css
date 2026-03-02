@@ -1,26 +1,339 @@
 @import "tailwindcss";
+@import "./design-tokens.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   Tailwind v4 Theme Mapping
+   --dt-* 토큰 → Tailwind 유틸리티 변수로 매핑
+   ============================================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* --------------------------------------------------
+     Font Families  →  font-sans / font-mono
+     -------------------------------------------------- */
+  --font-sans: var(--dt-font-family-sans);
+  --font-mono: var(--dt-font-family-mono);
+
+  /* --------------------------------------------------
+     Font Sizes  →  text-xs / text-sm / text-base …
+     -------------------------------------------------- */
+  --text-xs:      var(--dt-font-size-xs);       /* 11px */
+  --text-sm:      var(--dt-font-size-sm);       /* 12px */
+  --text-sm-plus: var(--dt-font-size-sm-plus);  /* 13px */
+  --text-base:    var(--dt-font-size-base);     /* 14px */
+  --text-md:      var(--dt-font-size-md);       /* 15px */
+  --text-lg:      var(--dt-font-size-lg);       /* 16px */
+  --text-lg-plus: var(--dt-font-size-lg-plus);  /* 17px */
+  --text-xl:      var(--dt-font-size-xl);       /* 18px */
+  --text-2xl:     var(--dt-font-size-2xl);      /* 20px */
+  --text-3xl:     var(--dt-font-size-3xl);      /* 22px */
+  --text-4xl:     var(--dt-font-size-4xl);      /* 24px */
+  --text-5xl:     var(--dt-font-size-5xl);      /* 26px */
+  --text-6xl:     var(--dt-font-size-6xl);      /* 28px */
+  --text-code:    var(--dt-font-size-code);     /* 20px mono */
+  --text-logo:    var(--dt-font-size-logo);     /* 24px logo */
+
+  /* --------------------------------------------------
+     Font Weights  →  font-regular / font-medium …
+     -------------------------------------------------- */
+  --font-weight-regular:  var(--dt-font-weight-regular);  /* 400 */
+  --font-weight-medium:   var(--dt-font-weight-medium);   /* 500 */
+  --font-weight-semibold: var(--dt-font-weight-semibold); /* 600 */
+  --font-weight-bold:     var(--dt-font-weight-bold);     /* 700 */
+  --font-weight-black:    var(--dt-font-weight-black);    /* 900 */
+
+  /* --------------------------------------------------
+     Line Heights  →  leading-none / leading-tight …
+     -------------------------------------------------- */
+  --leading-none:    var(--dt-line-height-none);    /* 100% */
+  --leading-tight:   var(--dt-line-height-tight);   /* 125% */
+  --leading-snug:    var(--dt-line-height-snug);    /* 130% */
+  --leading-normal:  var(--dt-line-height-normal);  /* 140% */
+  --leading-relaxed: var(--dt-line-height-relaxed); /* 150% */
+  --leading-loose:   var(--dt-line-height-loose);   /* 160% */
+  --leading-looser:  var(--dt-line-height-looser);  /* 163% */
+
+  /* --------------------------------------------------
+     Letter Spacing  →  tracking-tighter / tracking-tight …
+     -------------------------------------------------- */
+  --tracking-tighter: var(--dt-letter-spacing-tighter); /* -0.7px */
+  --tracking-tight:   var(--dt-letter-spacing-tight);   /* -0.55px */
+  --tracking-snug:    var(--dt-letter-spacing-snug);    /* -0.52px */
+  --tracking-normal:  var(--dt-letter-spacing-normal);  /* -0.5px */
+  --tracking-btn:     var(--dt-letter-spacing-btn);     /* -0.45px */
+  --tracking-body:    var(--dt-letter-spacing-body);    /* -0.4px */
+  --tracking-none:    var(--dt-letter-spacing-none);    /* 0 */
+  --tracking-label:   var(--dt-letter-spacing-label);   /* 0.6px */
+  --tracking-code:    var(--dt-letter-spacing-code);    /* 1px */
+  --tracking-logo:    var(--dt-letter-spacing-logo);    /* -1.44px */
+
+  /* --------------------------------------------------
+     Border Radius  →  rounded-sm / rounded-md …
+     -------------------------------------------------- */
+  --radius-none:  var(--dt-border-radius-none);  /* 0 */
+  --radius-sm:    var(--dt-border-radius-sm);    /* 6px */
+  --radius-md:    var(--dt-border-radius-md);    /* 10px */
+  --radius-input: var(--dt-border-radius-input); /* 12px */
+  --radius-lg:    var(--dt-border-radius-lg);    /* 16px */
+  --radius-xl:    var(--dt-border-radius-xl);    /* 24px */
+  --radius-full:  var(--dt-border-radius-full);  /* 9999px */
+
+  /* --------------------------------------------------
+     Shadows  →  shadow-sm / shadow / shadow-md / shadow-lg
+     -------------------------------------------------- */
+  --shadow-sm:  var(--dt-box-shadow-sm);      /* subtle card */
+  --shadow:     var(--dt-box-shadow-default); /* card */
+  --shadow-md:  var(--dt-box-shadow-md);      /* FAB / floating */
+  --shadow-lg:  var(--dt-box-shadow-lg);      /* modal / sheet */
+
+  /* --------------------------------------------------
+     Colors  →  text-*/bg-*/border-* utilities
+     -------------------------------------------------- */
+
+  /* Text semantic colors */
+  --color-text-primary:      var(--dt-color-text-primary);       /* #111827 */
+  --color-text-primary-soft: var(--dt-color-text-primary-soft);  /* #333333 */
+  --color-text-secondary:    var(--dt-color-text-secondary);     /* #4B5563 */
+  --color-text-tertiary:     var(--dt-color-text-tertiary);      /* #9CA3AF */
+  --color-text-subtle:       var(--dt-color-text-subtle);        /* #767676 */
+  --color-text-body:         var(--dt-color-text-body);          /* #4B5563 */
+  --color-text-header-title: var(--dt-color-text-header-title);  /* #333333 */
+  --color-text-on-dark:      var(--dt-color-text-on-dark);       /* #FFFFFF */
+  --color-text-timestamp:    var(--dt-color-text-timestamp);     /* #767676 */
+  --color-text-placeholder:  var(--dt-color-text-placeholder);   /* #C7C7CC */
+  --color-text-danger:       var(--dt-color-text-danger);        /* #EF4444 */
+
+  /* Background semantic colors */
+  --color-bg-base:         var(--dt-color-bg-base);         /* #FAFAFA */
+  --color-bg-surface:      var(--dt-color-bg-surface);      /* #FFFFFF */
+  --color-bg-muted:        var(--dt-color-bg-muted);        /* #F3F4F6 */
+  --color-bg-subtle:       var(--dt-color-bg-subtle);       /* #F5F5F5 */
+  --color-bg-elevated:     var(--dt-color-bg-elevated);     /* #F3F4F6 */
+  --color-bg-hover:        var(--dt-color-bg-hover);        /* #F5F5F5 */
+  --color-bg-disabled:     var(--dt-color-bg-disabled);     /* #E5E7EB */
+  --color-bg-icon-default: var(--dt-color-bg-icon-default); /* #F3F4F6 */
+  --color-bg-track:        var(--dt-color-bg-track);        /* #E5E7EB */
+  --color-bg-comment:      var(--dt-color-bg-comment);      /* #FAFAFA */
+  --color-bg-input-filled: var(--dt-color-bg-input-filled); /* #F3F4F6 */
+  --color-bg-input-white:  var(--dt-color-bg-input-white);  /* #FFFFFF */
+
+  /* Border semantic colors */
+  --color-border-default: var(--dt-color-border-default); /* #E5E7EB */
+  --color-border-strong:  var(--dt-color-border-strong);  /* #111827 */
+  --color-border-subtle:  var(--dt-color-border-subtle);  /* #F3F4F6 */
+  --color-border-section: var(--dt-color-border-section); /* #F3F4F6 */
+
+  /* Brand primary */
+  --color-primary-navy: var(--dt-color-primary-navy); /* #111827 */
+  --color-primary-soft: var(--dt-color-primary-soft); /* #333333 */
+
+  /* Status */
+  --color-status-remember:    var(--dt-color-status-remember);    /* #FF9800 */
+  --color-status-remember-bg: var(--dt-color-status-remember-bg); /* #FFF4E5 */
+  --color-status-danger:      var(--dt-color-status-danger);      /* #EF4444 */
+  --color-status-danger-bg:   var(--dt-color-status-danger-bg);   /* #FFF2EE */
+
+  /* Accent (SNS) */
+  --color-accent-kakao: var(--dt-color-accent-kakao); /* #FEE500 */
+  --color-accent-naver: var(--dt-color-accent-naver); /* #03A94D */
+
+  /* Tint backgrounds */
+  --color-tint-warm:         var(--dt-color-tint-warm);         /* #FFF2EE */
+  --color-tint-blue:         var(--dt-color-tint-blue);         /* #EEF5FF */
+  --color-tint-orange-light: var(--dt-color-tint-orange-light); /* #FFF4E5 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ============================================================
+   Base Styles
+   ============================================================ */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--dt-font-family-sans);
+  color: var(--dt-color-text-body);
+  background-color: var(--dt-color-bg-base);
+}
+
+/* ============================================================
+   Typography Composite Utilities  →  @utility typography-*
+   피그마 타이포그래피 토큰을 그대로 유틸리티 클래스로 제공
+   사용법: className="typography-h1"
+   ============================================================ */
+
+@utility typography-display {
+  /* 28px Bold -0.7 | 초대코드 대제목 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-6xl);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-tight);
+  letter-spacing: var(--dt-letter-spacing-tighter);
+}
+
+@utility typography-h1 {
+  /* 26px Bold -0.52 | 홈 메인 제목 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-5xl);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-loose);
+  letter-spacing: var(--dt-letter-spacing-snug);
+}
+
+@utility typography-h2 {
+  /* 24px Bold | 설정 유저명, 사진목록 그룹명 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-4xl);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-normal);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-h2-logo {
+  /* 24px Black -1.44 | 앱 로고 마씨(Merci) */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-logo);
+  font-weight: var(--dt-font-weight-black);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-logo);
+}
+
+@utility typography-modal-title {
+  /* 22px Bold -0.55 | 모달 제목 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-3xl);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-tight);
+}
+
+@utility typography-h3 {
+  /* 20px Bold -0.5 | 헤더 타이틀, 섹션 제목, 카드 타이틀 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-2xl);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-normal);
+  letter-spacing: var(--dt-letter-spacing-normal);
+}
+
+@utility typography-section-title {
+  /* 17px Bold | 사진상세 섹션 타이틀, 소셜 버튼 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-lg-plus);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-body-xl {
+  /* 18px Bold -0.45 | 저장하기 버튼 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-xl);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-btn);
+}
+
+@utility typography-body-lg {
+  /* 16px Medium | 부제목, 태그 버튼, placeholder */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-lg);
+  font-weight: var(--dt-font-weight-medium);
+  line-height: var(--dt-line-height-loose);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-body-lg-bold {
+  /* 16px Bold -0.4 | 확인/참여 버튼 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-lg);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-body);
+}
+
+@utility typography-body-md {
+  /* 15px Regular | 부제목 보조, 모달 안내 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-md);
+  font-weight: var(--dt-font-weight-regular);
+  line-height: var(--dt-line-height-looser);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-body-sm {
+  /* 14px Regular | 카드 설명, 보조 안내, placeholder */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-regular);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-body-sm-bold {
+  /* 14px Bold | 라벨, 섹션 소제목, 상태 레이블 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-body-xs {
+  /* 13px Regular | 댓글 본문, 카드 설명 보조 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-sm-plus);
+  font-weight: var(--dt-font-weight-regular);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-body-xs-semibold {
+  /* 13px SemiBold | 작성자명, 카드 제목 보조 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-sm-plus);
+  font-weight: var(--dt-font-weight-semibold);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-caption {
+  /* 12px Regular | 날짜, 작성자, 안내 텍스트 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-regular);
+  line-height: var(--dt-line-height-normal);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-caption-spaced {
+  /* 12px Regular ls+0.6 | 초대코드 레이블 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-regular);
+  line-height: var(--dt-line-height-normal);
+  letter-spacing: var(--dt-letter-spacing-label);
+}
+
+@utility typography-caption-medium {
+  /* 12px Medium | 오디오 타임코드 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-micro {
+  /* 11px Regular | 댓글 시간 */
+  font-family: var(--dt-font-family-sans);
+  font-size: var(--dt-font-size-xs);
+  font-weight: var(--dt-font-weight-regular);
+  line-height: var(--dt-line-height-relaxed);
+  letter-spacing: var(--dt-letter-spacing-none);
+}
+
+@utility typography-code {
+  /* 20px Bold ls+1 mono | 초대코드 텍스트 */
+  font-family: var(--dt-font-family-mono);
+  font-size: var(--dt-font-size-code);
+  font-weight: var(--dt-font-weight-bold);
+  line-height: var(--dt-line-height-normal);
+  letter-spacing: var(--dt-letter-spacing-code);
 }
