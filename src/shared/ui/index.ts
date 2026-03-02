@@ -3,6 +3,8 @@ export * from './icons';
 
 // Components
 export { Button } from './Button';
+export { Input } from './Input';
+export { PageHeader } from './PageHeader';
 export { IconButton } from './IconButton';
 export { SocialLoginButton } from './SocialLoginButton';
 export { Tab } from './Tab';

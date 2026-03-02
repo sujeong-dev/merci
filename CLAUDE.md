@@ -44,6 +44,25 @@ pnpm tokens   # tokens/tokens.json → app/design-tokens.css 재생성
 import { cn } from '@/shared/lib/utils';
 ```
 
+### 라우트 상수
+
+모든 페이지 경로는 `src/shared/config/routes.ts`의 `ROUTES` 객체에서 관리합니다.
+경로 문자열을 하드코딩하지 말고 반드시 `ROUTES` 상수를 사용하세요.
+
+```ts
+import { ROUTES } from '@/shared/config/routes';
+
+// ✅ 상수 사용
+<Link href={ROUTES.home} />
+router.push(ROUTES.createGroup);
+
+// ❌ 경로 하드코딩 금지
+<Link href="/home" />
+router.push('/create-group');
+```
+
+새 페이지 추가 시 `routes.ts`에 항목을 먼저 추가한 뒤 사용합니다.
+
 ---
 
 ## 아키텍처: FSD (Feature-Sliced Design)

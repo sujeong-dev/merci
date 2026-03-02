@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { CardButton } from '@/shared/ui';
+import { ROUTES } from '@/shared/config/routes';
 
 /**
  * 홈 페이지 — 그룹 진입 선택
@@ -39,6 +40,7 @@ export function HomePage() {
 
           {/* 카드 1: 가족 그룹 만들기 */}
           <CardButton
+            href={ROUTES.createGroup}
             icon={
               <Image
                 src="/images/home-icon-group.svg"
