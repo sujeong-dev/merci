@@ -14,15 +14,15 @@ export function LandingPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-bg-base px-5 py-10">
       {/* 콘텐츠 영역 — 피그마 기준 327px 너비, 60px 간격 */}
-      <div className="flex w-full max-w-[327px] flex-col items-center gap-[60px]">
+      <div className="flex w-full max-w-[327px] flex-col items-center gap-15">
 
         {/* ── 히어로 섹션 ─────────────────────────────────── */}
         {/* 피그마: Container(EMQXDL) — column, space-between, h-327 */}
-        <div className="flex h-[327px] w-full flex-col items-center justify-between">
+        <div className="flex w-full flex-col items-center justify-between">
 
           {/* 캐릭터 이미지 — 피그마: 176×196, 행 가운데 정렬 */}
           <div className="flex flex-1 items-center justify-center">
-            <div className="relative h-[196px] w-[176px]">
+            <div className="relative h-49 w-44">
               <Image
                 src="/images/merci-character.png"
                 alt="마씨 캐릭터"
@@ -34,7 +34,7 @@ export function LandingPage() {
           </div>
 
           {/* 앱 이름 + 부제목 — 피그마: column, gap-[11px] */}
-          <div className="flex flex-col items-center gap-[11px]">
+          <div className="flex flex-col items-center gap-auto">
             {/* 피그마: typography/h2-logo — 24px Black, ls -1.44, lh 150% */}
             <h1 className="typography-h2-logo text-center text-text-primary">
               마씨 (Merci)
