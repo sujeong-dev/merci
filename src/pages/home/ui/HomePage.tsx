@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { CardButton } from '@/shared/ui';
 
 /**
  * 홈 페이지 — 그룹 진입 선택
@@ -17,7 +18,7 @@ export function HomePage() {
         {/* ── 헤더 섹션 ───────────────────────────────────
             피그마 Margin(XLLY6R): pb-12(48px)
             Container(DJF7OO): column, gap-[15px]          */}
-        <div className="flex flex-col gap-[15px] pb-12">
+        <div className="flex flex-col gap-2 pb-12">
           {/* 피그마: typography/h1 — 26px Bold, lh 160%, ls -0.52px */}
           <h1 className="typography-h1 text-text-primary">
             반갑습니다!
@@ -36,69 +37,33 @@ export function HomePage() {
             피그마 Container(FTAKVO): column, stretch, gap-4(16px) */}
         <div className="flex flex-col gap-4">
 
-          {/* 카드 1: 가족 그룹 만들기
-              피그마 Button(2PIFDJ): row, gap-4, p-6, rounded-2xl,
-              bg-white, border #F3F4F6, shadow-sm              */}
-          <button
-            type="button"
-            className="flex w-full items-center gap-4 rounded-2xl border border-border-subtle bg-bg-surface p-6 text-left shadow-sm transition-opacity active:opacity-75"
-          >
-            {/* 아이콘 52×52 (배경 + 아이콘 포함 SVG) */}
-            <Image
-              src="/images/home-icon-group.svg"
-              alt=""
-              width={52}
-              height={52}
-              className="shrink-0"
-            />
-
-            {/* 텍스트 — fill remaining space */}
-            <div className="flex flex-1 flex-col">
-              {/* 피그마 style_OPM5OG ≈ typography-h3: 20px Bold, lh 140%, ls -0.5px */}
-              <span className="typography-h3 text-text-primary">가족 그룹 만들기</span>
-              {/* 피그마 typography/body-sm: 14px Regular, lh 150%, #4B5563 */}
-              <span className="typography-body-sm text-text-body">새로운 앨범 시작하기</span>
-            </div>
-
-            {/* 피그마 우측 chevron 8×12, #D1D5DB */}
-            <Image
-              src="/images/home-card-group.svg"
-              alt=""
-              width={8}
-              height={12}
-              className="shrink-0"
-            />
-          </button>
+          {/* 카드 1: 가족 그룹 만들기 */}
+          <CardButton
+            icon={
+              <Image
+                src="/images/home-icon-group.svg"
+                alt=""
+                width={52}
+                height={52}
+              />
+            }
+            title="가족 그룹 만들기"
+            subtitle="새로운 앨범 시작하기"
+          />
 
           {/* 카드 2: 초대 코드 입력 */}
-          <button
-            type="button"
-            className="flex w-full items-center gap-4 rounded-2xl border border-border-subtle bg-bg-surface p-6 text-left shadow-sm transition-opacity active:opacity-75"
-          >
-            {/* 아이콘 52×52 (파란 배경 + 인물 아이콘 SVG) */}
-            <Image
-              src="/images/home-icon-invite.svg"
-              alt=""
-              width={52}
-              height={52}
-              className="shrink-0"
-            />
-
-            <div className="flex flex-1 flex-col">
-              {/* 피그마 style_ZT2QPG ≈ typography-h3: 20px Bold */}
-              <span className="typography-h3 text-text-primary">초대 코드 입력</span>
-              {/* 피그마 style_UBKVBY ≈ typography-body-sm: 14px Regular */}
-              <span className="typography-body-sm text-text-body">기존 그룹에 참여하기</span>
-            </div>
-
-            <Image
-              src="/images/home-card-group.svg"
-              alt=""
-              width={8}
-              height={12}
-              className="shrink-0"
-            />
-          </button>
+          <CardButton
+            icon={
+              <Image
+                src="/images/home-icon-invite.svg"
+                alt=""
+                width={52}
+                height={52}
+              />
+            }
+            title="초대 코드 입력"
+            subtitle="기존 그룹에 참여하기"
+          />
 
           {/* 서비스 소개 캡션
               피그마 Container(UO7R3S): column, center, stretch, opacity-80 */}

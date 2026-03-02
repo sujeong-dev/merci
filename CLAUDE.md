@@ -142,3 +142,79 @@ export function LandingPage() {
 - ✅ 단일 사용자 액션
 - ✅ 비즈니스 로직은 훅으로 분리
 - ❌ 이벤트 핸들러를 props로 받지 않음
+
+---
+
+### 컴포넌트 분리 지침 ⚠️
+
+마크업 작업 중 **반복되는 구조**가 발견되면 FSD 레이어 기준에 맞게 컴포넌트로 즉시 분리합니다.
+
+#### 분리 기준 판단 흐름
+
+```
+반복 구조 발견
+    │
+    ├─ 도메인 지식 없는 순수 UI?
+    │       └─ YES → shared/ui/
+    │
+    ├─ 특정 도메인 데이터를 표시 (읽기 전용)?
+    │       └─ YES → entities/[domain]/ui/
+    │
+    ├─ 사용자 액션이 포함된 단일 기능?
+    │       └─ YES → features/[feature]/ui/
+    │
+    └─ 여러 feature/entity 조합?
+            └─ YES → widgets/[widget]/ui/
+```
+
+#### shared/ui/ 컴포넌트 위치 규칙
+
+| 종류 | 위치 | 예시 |
+|------|------|------|
+| 아이콘 SVG | `shared/ui/icons/[Name]Icon.tsx` | `ChevronRightIcon`, `PlusIcon` |
+| 기본 UI 컴포넌트 | `shared/ui/[Name].tsx` | `Button`, `CardButton`, `Tab` |
+
+**아이콘 규칙:**
+- 파일명: `[Name]Icon.tsx` (PascalCase + Icon 접미사)
+- Props 인터페이스: `size?: number`, `className?: string`
+- 색상: `fill="currentColor"` 또는 `stroke="currentColor"` — className으로 색 제어
+- 비정방형 아이콘: viewBox 비율에 맞게 `width`/`height` 계산 (e.g. 8:12 = `size * 8/12`)
+- `icons/index.ts`에 반드시 export 추가
+- 새 아이콘 추가 시 기존 아이콘 패턴 확인 후 일관성 유지
+
+**컴포넌트 규칙:**
+- 인라인 SVG가 2곳 이상 사용되면 `shared/ui/icons/`로 분리
+- 동일 JSX 구조가 2곳 이상이면 컴포넌트로 추출
+- `shared/ui/index.ts`에 반드시 export 추가 (named export)
+
+#### 분리 예시
+
+```tsx
+// ❌ 인라인 SVG를 여러 곳에서 직접 사용
+<svg width="8" height="12" viewBox="0 0 8 12">
+  <path d="M4.6 6L0 1.4..." fill="#D1D5DB" />
+</svg>
+
+// ✅ shared/ui/icons/ChevronRightIcon.tsx 로 분리 후 사용
+import { ChevronRightIcon } from '@/shared/ui/icons';
+<ChevronRightIcon className="text-[#D1D5DB]" />
+```
+
+```tsx
+// ❌ 동일 카드 버튼 구조 반복
+<button className="flex w-full items-center gap-4 ...">
+  <Image src="/icon-a.svg" ... />
+  <div><span>타이틀 A</span><span>설명 A</span></div>
+  <ChevronRightIcon />
+</button>
+<button className="flex w-full items-center gap-4 ...">
+  <Image src="/icon-b.svg" ... />
+  <div><span>타이틀 B</span><span>설명 B</span></div>
+  <ChevronRightIcon />
+</button>
+
+// ✅ shared/ui/CardButton.tsx 로 분리 후 사용
+import { CardButton } from '@/shared/ui';
+<CardButton icon={<Image src="/icon-a.svg" ... />} title="타이틀 A" subtitle="설명 A" />
+<CardButton icon={<Image src="/icon-b.svg" ... />} title="타이틀 B" subtitle="설명 B" />
+```

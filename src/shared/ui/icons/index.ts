@@ -6,6 +6,7 @@ export { MicIcon } from './MicIcon';
 export { CommentIcon } from './CommentIcon';
 export { CopyIcon } from './CopyIcon';
 export { ChevronLeftIcon } from './ChevronLeftIcon';
+export { ChevronRightIcon } from './ChevronRightIcon';
 export { ChevronDownIcon } from './ChevronDownIcon';
 export { ChevronUpIcon } from './ChevronUpIcon';
 export { WarningIcon } from './WarningIcon';
