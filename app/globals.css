@@ -127,10 +127,14 @@
   --color-primary-soft: var(--dt-color-primary-soft); /* #333333 */
 
   /* Status */
-  --color-status-remember:    var(--dt-color-status-remember);    /* #FF9800 */
-  --color-status-remember-bg: var(--dt-color-status-remember-bg); /* #FFF4E5 */
-  --color-status-danger:      var(--dt-color-status-danger);      /* #EF4444 */
-  --color-status-danger-bg:   var(--dt-color-status-danger-bg);   /* #FFF2EE */
+  --color-status-remember:       var(--dt-color-status-remember);              /* #FF9800 */
+  --color-status-remember-bg:    var(--dt-color-status-remember-bg);           /* #FFF4E5 */
+  --color-status-vague:          var(--dt-color-primitive-purple-500);         /* #9C27B0 */
+  --color-status-vague-bg:       var(--dt-color-primitive-purple-50);          /* #F3E5F5 */
+  --color-status-unfamiliar:     var(--dt-color-primitive-green-400);          /* #4CAF50 */
+  --color-status-unfamiliar-bg:  var(--dt-color-primitive-green-50);           /* #E8F5E9 */
+  --color-status-danger:         var(--dt-color-status-danger);                /* #EF4444 */
+  --color-status-danger-bg:      var(--dt-color-status-danger-bg);             /* #FFF2EE */
 
   /* Accent (SNS) */
   --color-accent-kakao: var(--dt-color-accent-kakao); /* #FEE500 */

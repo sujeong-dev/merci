@@ -33,9 +33,28 @@ import { cn } from '@/shared/lib/utils';
  */
 
 const REACTIONS = [
-  { key: 'remember', label: '기억하심', Icon: RememberIcon },
-  { key: 'vague', label: '가물가물', Icon: VagueIcon },
-  { key: 'unfamiliar', label: '낯설어하심', Icon: UnfamiliarIcon },
+  {
+    key: 'remember',
+    label: '기억하심',
+    Icon: RememberIcon,
+    /** 선택=on (Figma 132:544): bg·border·text 모두 status-remember 토큰 */
+    selectedCard: 'bg-status-remember-bg border border-status-remember',
+    selectedText: 'text-status-remember',
+  },
+  {
+    key: 'vague',
+    label: '가물가물',
+    Icon: VagueIcon,
+    selectedCard: 'bg-status-vague-bg border border-status-vague',
+    selectedText: 'text-status-vague',
+  },
+  {
+    key: 'unfamiliar',
+    label: '낯설어하심',
+    Icon: UnfamiliarIcon,
+    selectedCard: 'bg-status-unfamiliar-bg border border-status-unfamiliar',
+    selectedText: 'text-status-unfamiliar',
+  },
 ] as const;
 
 type ReactionKey = (typeof REACTIONS)[number]['key'];
@@ -113,23 +132,36 @@ export function PhotoDetailPage() {
           {/* 반응 카드 3개 (120:985): row, gap:12px ─────────────────
               각 카드: col, center, rounded-24px, white, shadow, py:24px px:4px */}
           <div className="flex gap-3">
-            {REACTIONS.map(({ key, label, Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setReaction(key)}
-                className={cn(
-                  'flex flex-1 flex-col items-center rounded-[24px] bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
-                  reaction === key && 'ring-2 ring-primary-soft',
-                )}
-              >
-                {/* 반응 아이콘 (48px, pb:12px) */}
-                <span className="pb-3">
-                  <Icon size={48} />
-                </span>
-                <span className="typography-body-sm-bold text-text-primary">{label}</span>
-              </button>
-            ))}
+            {REACTIONS.map(({ key, label, Icon, selectedCard, selectedText }) => {
+              const isSelected = reaction === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setReaction(key)}
+                  className={cn(
+                    /* 선택=off: white bg, 테두리 없음 */
+                    'flex flex-1 flex-col items-center rounded-[24px] bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
+                    /* 선택=on: 반응별 bg·border 토큰 적용 */
+                    isSelected && selectedCard,
+                  )}
+                >
+                  {/* 반응 아이콘 (48px, pb:12px) */}
+                  <span className="pb-3">
+                    <Icon size={48} />
+                  </span>
+                  <span
+                    className={cn(
+                      'typography-body-sm-bold',
+                      /* 선택=off: text-primary / 선택=on: 반응별 text 토큰 */
+                      isSelected ? selectedText : 'text-text-primary',
+                    )}
+                  >
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
         </div>
