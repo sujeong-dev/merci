@@ -27,7 +27,7 @@ export function Input({ label, id, className, wrapperClassName, ...props }: Inpu
     <input
       id={id}
       className={cn(
-        'h-[60px] w-full rounded-[10px] bg-input-white px-6 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.04)] typography-body-lg text-text-primary outline-none placeholder:text-text-placeholder',
+        'h-[60px] w-full rounded-[10px] bg-bg-input-white px-6 shadow-[0px_2px_12px_0px_rgba(0,0,0,0.04)] typography-body-lg text-text-primary outline-none placeholder:text-text-placeholder',
         className,
       )}
       {...props}
