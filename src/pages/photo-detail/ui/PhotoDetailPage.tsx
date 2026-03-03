@@ -32,21 +32,21 @@ const REACTIONS = [
     label: '기억하심',
     Icon: RememberIcon,
     /** 선택=on (Figma 132:544): bg·border·text 모두 status-remember 토큰 */
-    selectedCard: 'bg-status-remember-bg border border-status-remember',
+    selectedCard: 'bg-status-remember-bg border-status-remember',
     selectedText: 'text-status-remember',
   },
   {
     key: 'vague',
     label: '가물가물',
     Icon: VagueIcon,
-    selectedCard: 'bg-status-vague-bg border border-status-vague',
+    selectedCard: 'bg-status-vague-bg border-status-vague',
     selectedText: 'text-status-vague',
   },
   {
     key: 'unfamiliar',
     label: '낯설어하심',
     Icon: UnfamiliarIcon,
-    selectedCard: 'bg-status-unfamiliar-bg border border-status-unfamiliar',
+    selectedCard: 'bg-status-unfamiliar-bg border-status-unfamiliar',
     selectedText: 'text-status-unfamiliar',
   },
 ] as const;
@@ -136,9 +136,9 @@ export function PhotoDetailPage() {
                     type='button'
                     onClick={() => setReaction(key)}
                     className={cn(
-                      /* 선택=off: white bg, 테두리 없음 */
-                      'flex flex-1 flex-col items-center rounded-[24px] bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
-                      /* 선택=on: 반응별 bg·border 토큰 적용 */
+                      /* 선택=off: border 공간 미리 확보(transparent)해서 레이아웃 시프트 방지 */
+                      'flex flex-1 flex-col items-center rounded-[24px] border border-transparent bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
+                      /* 선택=on: 반응별 bg·border-color 토큰 적용 */
                       isSelected && selectedCard,
                     )}
                   >
