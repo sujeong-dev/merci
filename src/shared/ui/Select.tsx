@@ -53,7 +53,7 @@ export function Select({ options, value, placeholder = '선택하세요', onChan
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 typography-body-sm text-text-primary"
+        className="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 typography-body-lg text-text-primary"
       >
         <span>{selected?.label ?? placeholder}</span>
         {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
