@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { cn } from '@/shared/lib/utils';
 import { ChevronRightIcon } from '@/shared/ui/icons';
+import { MouseEventHandler } from 'react';
 
 /**
  * 아이콘 + 타이틀 + 부제목 + 우측 화살표로 구성된 카드형 버튼
@@ -51,29 +51,19 @@ export interface CardButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
    * 이동할 경로 — 제공 시 `<Link>`로 렌더링됩니다.
    * Server Component 페이지에서도 onClick 없이 라우팅이 가능합니다.
    */
-  href?: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export function CardButton({ icon, title, subtitle, href, className, ...props }: CardButtonProps) {
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className={cn(cardClass, className)}
-      >
-        {cardInner(icon, title, subtitle)}
-      </Link>
-    );
-  }
-
+export function CardButton({ icon, title, subtitle, onClick, className, ...props }: CardButtonProps) {
   return (
     <button
-      type="button"
+      type='button'
       className={cn(
         cardClass,
         'disabled:pointer-events-none disabled:opacity-40',
         className,
       )}
+      onClick={onClick}
       {...props}
     >
       {cardInner(icon, title, subtitle)}
