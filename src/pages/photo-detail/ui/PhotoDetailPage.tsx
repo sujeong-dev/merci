@@ -120,7 +120,7 @@ export function PhotoDetailPage() {
         {/* ── 어르신 반응 (19:558) ────────────────────────────────────
             heading pb:16px + 3-column 선택 카드                    */}
         <div>
-          <h2 className='typography-h3 pb-4 text-text-primary'>
+          <h2 className='typography-body-sm-bold text-text-primary pb-4'>
             오늘 어르신의 반응은 어떠셨나요?
           </h2>
 
@@ -168,7 +168,7 @@ export function PhotoDetailPage() {
           <div className='flex flex-col rounded-[16px] bg-white px-4 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
             {/* 헤더 (19:481): "가족들의 반응" pb:20px */}
             <div className='pb-5'>
-              <span className='typography-body-sm-bold text-[#333333]'>
+              <span className='typography-body-sm-bold text-text-primary]'>
                 가족들의 반응
               </span>
             </div>
