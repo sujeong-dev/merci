@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CopyIcon, CheckIcon } from '@/shared/ui/icons';
-import { SocialLoginButton } from '@/shared/ui';
+import { ModalSheet, SocialLoginButton } from '@/shared/ui';
 import { ROUTES } from '@/shared/config/routes';
 
 /**
@@ -39,8 +39,6 @@ export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedM
   /** 복사 완료 상태 — true이면 CheckIcon 표시, 2초 후 자동 원복 */
   const [isCopied, setIsCopied] = useState(false);
 
-  if (!isOpen) return null;
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(inviteCode);
@@ -57,11 +55,7 @@ export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedM
   };
 
   return (
-    /* 오버레이 — fixed 전체, rgba(0,0,0,0.4), backdrop-blur-[2px] */
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/40 backdrop-blur-[2px]">
-
-      {/* 모달 카드 — max-w-340px, rounded-24px, shadow-lg */}
-      <div className="w-full max-w-[340px] rounded-[24px] bg-bg-surface pt-12 px-6 pb-8 shadow-lg">
+    <ModalSheet isOpen={isOpen}>
 
         {/* ── 제목 섹션 ─────────────────────────────────────────
             피그마 (6:1059): pb-40px, text-center
@@ -136,7 +130,6 @@ export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedM
 
         </div>
 
-      </div>
-    </div>
+    </ModalSheet>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CopyIcon, CheckIcon } from '@/shared/ui/icons';
-import { Button, Input, SocialLoginButton } from '@/shared/ui';
+import { Button, Input, ModalSheet, SocialLoginButton } from '@/shared/ui';
 import { ROUTES } from '@/shared/config/routes';
 
 /**
@@ -37,17 +37,12 @@ interface InviteCodeInputModalProps {
 export function InviteCodeInputModal({ isOpen, onClose, inviteCode }: InviteCodeInputModalProps) {
   const router = useRouter();
 
-  if (!isOpen) return null;
-
   const handleCancel = () => {
     onClose();
   };
 
   return (
-    /* 오버레이 — fixed 전체, rgba(0,0,0,0.4), backdrop-blur-[2px] */
-    <div className='fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/40 backdrop-blur-[2px]'>
-      {/* 모달 카드 — max-w-340px, rounded-24px, shadow-lg */}
-      <div className='w-full max-w-[340px] rounded-[24px] bg-bg-surface pt-12 px-6 pb-8 shadow-lg'>
+    <ModalSheet isOpen={isOpen}>
         {/* ── 제목 섹션 ─────────────────────────────────────────
             피그마 (6:1059): pb-40px, text-center
             typography/modal-title — 22px Bold, ls -0.55px, lh 150%  */}
@@ -91,7 +86,6 @@ export function InviteCodeInputModal({ isOpen, onClose, inviteCode }: InviteCode
             취소
           </button>
         </div>
-      </div>
-    </div>
+    </ModalSheet>
   );
 }
