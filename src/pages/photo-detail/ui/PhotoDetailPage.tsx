@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, PageHeader, ProgressBar } from '@/shared/ui';
-import { MoreIcon, PlayIcon } from '@/shared/ui/icons';
+import { Accordion, Button, PageHeader, ProgressBar } from '@/shared/ui';
+import {
+  CommentIcon,
+  PlayIcon,
+  RememberIcon,
+  UnfamiliarIcon,
+  VagueIcon,
+} from '@/shared/ui/icons';
 import { cn } from '@/shared/lib/utils';
 
 /**
@@ -14,21 +20,22 @@ import { cn } from '@/shared/lib/utils';
  * ## 섹션 구성
  * 1. 사진 (420px, white card)
  * 2. 오디오 플레이어 (PlayIcon + ProgressBar + 시간)
- * 3. 추억 정보 (연도·장소·인물·이야기 info card)
- * 4. 어르신 반응 (3-option 선택 카드)
- * 5. 가족들의 반응 (댓글 목록 + 입력창)
+ * 3. 추억 정보 — Accordion 토글 (연도·장소·인물·이야기)
+ * 4. 어르신 반응 (3-option 선택 카드, RememberIcon/VagueIcon/UnfamiliarIcon)
+ * 5. 가족들의 반응 (CommentIcon + 댓글 목록 + 입력창)
  *
  * ## 재사용된 공통 컴포넌트
  * - PageHeader (title="기억의 기록") — shared/ui
+ * - Accordion (title="추억 정보") — shared/ui
  * - ProgressBar — shared/ui
  * - Button (variant="gray") — shared/ui
- * - PlayIcon, MoreIcon — shared/ui/icons
+ * - PlayIcon, CommentIcon, RememberIcon, VagueIcon, UnfamiliarIcon — shared/ui/icons
  */
 
 const REACTIONS = [
-  { key: 'remember', label: '기억하심', emoji: '😊' },
-  { key: 'vague', label: '가물가물', emoji: '🤔' },
-  { key: 'unfamiliar', label: '낯설어하심', emoji: '😟' },
+  { key: 'remember', label: '기억하심', Icon: RememberIcon },
+  { key: 'vague', label: '가물가물', Icon: VagueIcon },
+  { key: 'unfamiliar', label: '낯설어하심', Icon: UnfamiliarIcon },
 ] as const;
 
 type ReactionKey = (typeof REACTIONS)[number]['key'];
@@ -82,18 +89,9 @@ export function PhotoDetailPage() {
 
         </div>
 
-        {/* ── 추억 정보 (19:543) ──────────────────────────────────────
-            헤더(py:12px): "추억 정보" h3 + edit icon
-            카드(34:985): bg:#F3F4F6, rounded-10, p:20px, gap:20px  */}
-        <div>
-
-          <div className="flex items-center justify-between py-3">
-            <h2 className="typography-h3 text-text-primary">추억 정보</h2>
-            <button type="button" aria-label="수정">
-              <MoreIcon size={12} className="text-text-tertiary" />
-            </button>
-          </div>
-
+        {/* ── 추억 정보 (19:543): Accordion 토글 ─────────────────────
+            펼치면 bg:#F3F4F6 카드, rounded-10, p:20px, gap:20px    */}
+        <Accordion title="추억 정보" defaultOpen>
           <div className="flex flex-col gap-5 rounded-[10px] bg-[#F3F4F6] p-5">
             {INFO_ROWS.map(({ label, value }) => (
               <div key={label} className="flex flex-col gap-1">
@@ -102,8 +100,7 @@ export function PhotoDetailPage() {
               </div>
             ))}
           </div>
-
-        </div>
+        </Accordion>
 
         {/* ── 어르신 반응 (19:558) ────────────────────────────────────
             heading pb:16px + 3-column 선택 카드                    */}
@@ -116,7 +113,7 @@ export function PhotoDetailPage() {
           {/* 반응 카드 3개 (120:985): row, gap:12px ─────────────────
               각 카드: col, center, rounded-24px, white, shadow, py:24px px:4px */}
           <div className="flex gap-3">
-            {REACTIONS.map(({ key, label, emoji }) => (
+            {REACTIONS.map(({ key, label, Icon }) => (
               <button
                 key={key}
                 type="button"
@@ -126,8 +123,10 @@ export function PhotoDetailPage() {
                   reaction === key && 'ring-2 ring-primary-soft',
                 )}
               >
-                {/* 이모지 아이콘 (48px, pb:12px) */}
-                <span className="pb-3 text-5xl leading-none">{emoji}</span>
+                {/* 반응 아이콘 (48px, pb:12px) */}
+                <span className="pb-3">
+                  <Icon size={48} />
+                </span>
                 <span className="typography-body-sm-bold text-text-primary">{label}</span>
               </button>
             ))}
@@ -151,8 +150,8 @@ export function PhotoDetailPage() {
               {COMMENTS.map(({ id, author, time, text }) => (
                 <div key={id} className="flex gap-3">
 
-                  {/* 아바타 (32×32, rounded-full, #FAFAFA) */}
-                  <div className="size-8 shrink-0 rounded-full bg-[#FAFAFA]" />
+                  {/* 댓글 아이콘 (CommentIcon, 아바타 대체) */}
+                  <CommentIcon size={24} className="mt-0.5 shrink-0 text-text-tertiary" />
 
                   {/* 댓글 내용 */}
                   <div className="flex flex-1 flex-col gap-1">
@@ -176,8 +175,8 @@ export function PhotoDetailPage() {
             {/* 입력 영역 (19:506): pt:24px, row, gap:12px ────────────*/}
             <div className="flex items-center gap-3 pt-6">
 
-              {/* 아바타 */}
-              <div className="size-8 shrink-0 rounded-full bg-[#FAFAFA]" />
+              {/* 입력창 CommentIcon */}
+              <CommentIcon size={24} className="shrink-0 text-text-tertiary" />
 
               {/* 입력창 (fill, body-sm, placeholder #C7C7CC) */}
               <input

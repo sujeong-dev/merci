@@ -14,3 +14,6 @@ export { AddPictureIcon } from './AddPictureIcon';
 export { SettingsIcon } from './SettingsIcon';
 export { MoreIcon } from './MoreIcon';
 export { CheckIcon } from './CheckIcon';
+export { RememberIcon } from './RememberIcon';
+export { VagueIcon } from './VagueIcon';
+export { UnfamiliarIcon } from './UnfamiliarIcon';
