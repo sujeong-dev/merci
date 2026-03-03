@@ -18,6 +18,9 @@ export const ROUTES = {
 
   /** 가족 그룹 만들기 — 어르신 성함 입력 */
   createGroup: '/create-group',
+
+  /** 사진 목록 — 그룹 앨범 사진 리스트 */
+  photoList: '/photo-list',
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];
