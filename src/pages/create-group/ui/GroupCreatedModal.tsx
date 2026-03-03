@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CopyIcon } from '@/shared/ui/icons';
+import { CopyIcon, CheckIcon } from '@/shared/ui/icons';
 import { SocialLoginButton } from '@/shared/ui';
 import { ROUTES } from '@/shared/config/routes';
 
@@ -15,9 +16,12 @@ import { ROUTES } from '@/shared/config/routes';
  * - 초대 코드 섹션: caption-spaced 라벨 + 코드박스(row space-between), pb-10
  * - 버튼 섹션: 카카오 공유 버튼 + 홈으로 이동 텍스트 버튼
  *
+ * ## 복사 버튼 동작
+ * 복사 클립보드 성공 → CopyIcon을 CheckIcon(node 157:762)으로 교체 → 2초 후 원복
+ *
  * ## 재사용된 공통 컴포넌트
  * - SocialLoginButton (variant="kakao") — children으로 텍스트 오버라이드
- * - CopyIcon — shared/ui/icons
+ * - CopyIcon, CheckIcon — shared/ui/icons
  * - typography-modal-title, typography-caption-spaced, typography-body-lg-bold — globals.css
  */
 
@@ -32,11 +36,19 @@ interface GroupCreatedModalProps {
 
 export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedModalProps) {
   const router = useRouter();
+  /** 복사 완료 상태 — true이면 CheckIcon 표시, 2초 후 자동 원복 */
+  const [isCopied, setIsCopied] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(inviteCode);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteCode);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      // clipboard 권한 거부 등 실패 시 상태 변경 없이 무시
+    }
   };
 
   const handleHome = () => {
@@ -72,20 +84,29 @@ export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedM
 
           {/* 코드 박스 — row space-between, px-20px, bg #F5F5F5, border #F9FAFB */}
           <div className="flex w-full items-center justify-between px-5 h-[60px] bg-bg-subtle border border-[#F9FAFB] rounded-[10px]">
+
             {/* 초대 코드 텍스트 — typography/body-lg-bold: 16px Bold, ls -0.4px */}
             <span className="typography-body-lg-bold text-text-primary">
               {inviteCode}
             </span>
 
-            {/* 복사 버튼 — CopyIcon 24×24 */}
+            {/* 복사 버튼
+                기본: CopyIcon (text-text-tertiary, 회색)
+                복사 완료: CheckIcon (text-text-primary, 진하게) → 2초 후 원복
+                피그마 체크 아이콘: node 157:762                              */}
             <button
               type="button"
               onClick={handleCopy}
-              aria-label="초대 코드 복사"
-              className="flex items-center justify-center p-1 active:opacity-70"
+              aria-label={isCopied ? '복사 완료' : '초대 코드 복사'}
+              className="flex items-center justify-center p-1 transition-opacity active:opacity-70"
             >
-              <CopyIcon className="text-text-tertiary" />
+              {isCopied ? (
+                <CheckIcon size={24} className="text-text-primary" />
+              ) : (
+                <CopyIcon className="text-text-tertiary" />
+              )}
             </button>
+
           </div>
 
         </div>
