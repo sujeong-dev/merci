@@ -24,6 +24,9 @@ export const ROUTES = {
 
   /** 사진 등록 — 새로운 기억 담기 */
   photoUpload: '/photo-upload',
+
+  /** 사진 상세 — 기억의 기록 */
+  photoDetail: '/photo-detail',
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];
