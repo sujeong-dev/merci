@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Select } from '@/shared/ui';
-import { SettingsIcon, WarningIcon } from '@/shared/ui/icons';
+import { PlusIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
+import { ROUTES } from '@/shared/config/routes';
 
 /**
  * 사진 목록 — 목록 없음 (빈 상태)
@@ -117,6 +119,16 @@ export function PhotoListPage() {
         </div>
 
       </main>
+
+      {/* ── FAB — 사진 등록 버튼 ─────────────────────────────────
+          fixed 우하단, 56×56, bg-primary-soft(#333333), rounded-full */}
+      <Link
+        href={ROUTES.photoUpload}
+        aria-label="사진 등록"
+        className="fixed bottom-8 right-6 flex size-14 items-center justify-center rounded-full bg-primary-soft shadow-lg transition-opacity active:opacity-70"
+      >
+        <PlusIcon size={24} className="text-white" />
+      </Link>
 
     </div>
   );

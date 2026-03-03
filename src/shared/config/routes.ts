@@ -21,6 +21,9 @@ export const ROUTES = {
 
   /** 사진 목록 — 그룹 앨범 사진 리스트 */
   photoList: '/photo-list',
+
+  /** 사진 등록 — 새로운 기억 담기 */
+  photoUpload: '/photo-upload',
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];
