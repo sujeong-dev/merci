@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { SocialLoginButton } from '@/shared/ui';
-import { useKakaoLogin } from '@/features/auth';
+import { useKakaoLogin, useNaverLogin } from '@/features/auth';
 
 /**
  * 랜딩페이지
@@ -13,7 +13,8 @@ import { useKakaoLogin } from '@/features/auth';
  * - 소셜 로그인: 네이버 / 카카오
  */
 export function LandingPage() {
-  const { handleKakaoLogin, isPending } = useKakaoLogin();
+  const { handleKakaoLogin, isPending: isKakaoPending } = useKakaoLogin();
+  const { handleNaverLogin, isPending: isNaverPending } = useNaverLogin();
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-bg-base px-5 py-10">
@@ -55,14 +56,21 @@ export function LandingPage() {
         {/* ── 소셜 로그인 버튼 ────────────────────────────── */}
         {/* 피그마: Container(QW6FF2) — column, stretch, gap-3 */}
         <div className="flex w-full flex-col items-center gap-3">
-          <SocialLoginButton variant="naver" className='py-3 max-w-md'>네이버로 시작하기</SocialLoginButton>
+          <SocialLoginButton
+            variant="naver"
+            className='py-3 max-w-md'
+            onClick={handleNaverLogin}
+            disabled={isNaverPending}
+          >
+            {isNaverPending ? '네이버 연결 중...' : '네이버로 시작하기'}
+          </SocialLoginButton>
           <SocialLoginButton
             variant="kakao"
             className='py-3 max-w-md'
             onClick={handleKakaoLogin}
-            disabled={isPending}
+            disabled={isKakaoPending}
           >
-            {isPending ? '카카오 연결 중...' : '카카오로 시작하기'}
+            {isKakaoPending ? '카카오 연결 중...' : '카카오로 시작하기'}
           </SocialLoginButton>
         </div>
 

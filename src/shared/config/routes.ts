@@ -33,6 +33,9 @@ export const ROUTES = {
 
   /** 카카오 로그인 OAuth 콜백 */
   authKakaoCallback: '/auth/kakao/callback',
+
+  /** 네이버 로그인 OAuth 콜백 */
+  authNaverCallback: '/auth/naver/callback',
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];

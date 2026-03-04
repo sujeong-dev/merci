@@ -18,6 +18,18 @@ export async function kakaoLogin(code: string): Promise<AuthTokens> {
   return data;
 }
 
+/** 네이버 OAuth 인가 URL + state 조회 */
+export async function getNaverAuthorizeInfo(): Promise<{ url: string; state: string }> {
+  const { data } = await apiClient.get<{ url: string; state: string }>('/auth/naver/authorize');
+  return data;
+}
+
+/** 네이버 인가 코드 + state로 로그인 (토큰 발급) */
+export async function naverLogin(code: string, state: string): Promise<AuthTokens> {
+  const { data } = await apiClient.post<AuthTokens>('/auth/naver/login', { code, state });
+  return data;
+}
+
 /** Refresh Token으로 Access Token 재발급 */
 export async function refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
   const { data } = await apiClient.post<AuthTokens>('/auth/refresh', {
