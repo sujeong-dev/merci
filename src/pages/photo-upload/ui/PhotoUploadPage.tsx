@@ -28,7 +28,7 @@ export function PhotoUploadPage() {
       <PageHeader title="새로운 기억 담기" />
 
       {/* ── Main (6:802): col, px:20px, pt:24px, gap:40px ────────*/}
-      <main className="flex flex-col gap-10 px-5 pt-6 pb-10">
+      <main className="flex flex-col gap-10 px-5 pt-6 pb-32">
 
         {/* ── 사진 선택 (6:804) ────────────────────────────────────
             col, gap:3 (Input label 간격 기준)                     */}
@@ -161,13 +161,15 @@ export function PhotoUploadPage() {
           </div>
         </div>
 
-        {/* ── 저장하기 버튼 (120:867) ──────────────────────────────
-            bg:#333333 (primary-soft), rounded-10px, py:16px, w:full */}
-        <Button type="button" variant="primary" fullWidth>
+      </main>
+
+      {/* ── 저장하기 버튼 (120:867) ──────────────────────────────
+          fixed, max-w-app 중앙 정렬 (create-group 패턴 동일)    */}
+      <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-app bg-bg-base px-6 pb-11 pt-3">
+        <Button type="button" variant="primary" fullWidth className="h-[60px]">
           저장하기
         </Button>
-
-      </main>
+      </div>
 
     </div>
   );

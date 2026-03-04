@@ -54,7 +54,7 @@ export function CreateGroupPage() {
       {/* ── 하단 확인 버튼 (fixed) ────────────────────────────
           피그마 Container(6:678): 327×60px, x=24, y=708
           Button(6:679): fill #333333 (primary), radius 10px   */}
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-11">
+      <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-app bg-bg-base px-6 pb-11 pt-3">
         <Button
           type="button"
           variant="primary"

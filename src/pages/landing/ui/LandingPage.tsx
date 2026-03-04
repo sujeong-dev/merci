@@ -14,7 +14,7 @@ export function LandingPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-bg-base px-5 py-10">
       {/* 콘텐츠 영역 — 피그마 기준 327px 너비, 60px 간격 */}
-      <div className="flex w-full max-w-[327px] flex-col items-center gap-15">
+      <div className="flex w-full flex-col items-center gap-15">
 
         {/* ── 히어로 섹션 ─────────────────────────────────── */}
         {/* 피그마: Container(EMQXDL) — column, space-between, h-327 */}
@@ -50,9 +50,9 @@ export function LandingPage() {
 
         {/* ── 소셜 로그인 버튼 ────────────────────────────── */}
         {/* 피그마: Container(QW6FF2) — column, stretch, gap-3 */}
-        <div className="flex w-full flex-col gap-3">
-          <SocialLoginButton variant="naver">네이버로 시작하기</SocialLoginButton>
-          <SocialLoginButton variant="kakao">카카오로 시작하기</SocialLoginButton>
+        <div className="flex w-full flex-col items-center gap-3">
+          <SocialLoginButton variant="naver" className='py-3 max-w-md'>네이버로 시작하기</SocialLoginButton>
+          <SocialLoginButton variant="kakao" className='py-3 max-w-md'>카카오로 시작하기</SocialLoginButton>
         </div>
 
       </div>
