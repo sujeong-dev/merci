@@ -30,6 +30,9 @@ export const ROUTES = {
 
   /** 설정 — 어르신 관계 및 가족 초대 코드 */
   settings: '/settings',
+
+  /** 카카오 로그인 OAuth 콜백 */
+  authKakaoCallback: '/auth/kakao/callback',
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];
