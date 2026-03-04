@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ServerWakeGuard } from "@/widgets/server-wake-guard/ui/ServerWakeGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,9 @@ export default function RootLayout({
       >
         {/* 태블릿 최대 너비 컨테이너 — max-w-app(768px) 중앙 정렬 */}
         <div className="mx-auto w-full max-w-app">
-          {children}
+          <ServerWakeGuard>
+            {children}
+          </ServerWakeGuard>
         </div>
       </body>
     </html>

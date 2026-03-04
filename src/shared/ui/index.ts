@@ -19,3 +19,4 @@ export { CardButton } from './CardButton';
 export type { CardButtonProps } from './CardButton';
 export { ModalSheet } from './ModalSheet';
 export { CommentInput } from './CommentInput';
+export { Spinner } from './Spinner';
