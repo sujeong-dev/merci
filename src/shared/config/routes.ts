@@ -27,6 +27,9 @@ export const ROUTES = {
 
   /** 사진 상세 — 기억의 기록 */
   photoDetail: '/photo-detail',
+
+  /** 설정 — 어르신 관계 및 가족 초대 코드 */
+  settings: '/settings',
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];

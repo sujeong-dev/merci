@@ -38,53 +38,46 @@ export function PhotoListPage() {
   const [author, setAuthor] = useState('');
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg-base">
-
+    <div className='flex min-h-dvh flex-col bg-bg-base'>
       {/* ── Header — 앱 수준 요소만 ───────────────────────────────
           피그마 (9:234): row, space-between, padding 24px 20px
           pb-6(24px) = 로고↔그룹명 간격 (기존 col gap-6 역할)       */}
-      <header className="flex items-center justify-between px-5 pt-6 pb-6">
-
+      <header className='flex items-center justify-between px-5 py-2'>
         {/* "마씨(Merci)" 로고 — typography/h2-logo (#111827) */}
-        <span className="typography-h2-logo text-text-primary">
+        <span className='typography-h2-logo text-text-primary'>
           마씨(Merci)
         </span>
 
         {/* 설정 버튼 (9:237): 40×40, white, border #F3F4F6, shadow, rounded-full */}
-        <button
-          type="button"
-          aria-label="설정"
-          className="flex size-10 items-center justify-center rounded-full border border-[#F3F4F6] bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+        <Link
+          href={ROUTES.settings}
+          aria-label='설정'
+          className='flex size-10 items-center justify-center rounded-full border border-[#F3F4F6] bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]'
         >
-          <SettingsIcon size={20} className="text-text-primary" />
-        </button>
-
+          <SettingsIcon size={20} className='text-text-primary' />
+        </Link>
       </header>
 
       {/* ── Main ──────────────────────────────────────────────────*/}
-      <main className="flex flex-1 flex-col">
-
+      <main className='flex flex-1 flex-col pt-8 mx-5'>
         {/* 그룹명 + 필터 (9:240): col, gap-16px
             pb-6(24px) = 필터↔빈상태 간격 (기존 header pb-6 역할)   */}
-        <div className="flex flex-col gap-4 px-5 pb-6">
-
+        <div className='flex flex-col gap-4 pb-6'>
           {/* 그룹명 (9:242) — typography/h2 (#111827) */}
-          <h1 className="typography-h2 text-text-primary">
-            심복자 어르신네
-          </h1>
+          <h1 className='typography-h2 text-text-primary'>심복자 어르신네</h1>
 
           {/* 필터 pills (9:243): row, gap-8px */}
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             <Select
               options={[]}
               value={period}
-              placeholder="기간"
+              placeholder='기간'
               onChange={setPeriod}
             />
             <Select
               options={[]}
               value={author}
-              placeholder="작성자"
+              placeholder='작성자'
               onChange={setAuthor}
             />
           </div>
@@ -92,44 +85,39 @@ export function PhotoListPage() {
 
         {/* 빈 상태 영역: 나머지 공간 채우며 중앙 정렬
             피그마 (114:512, layout_JA5S82): col, center, y:246     */}
-        <div className="flex flex-1 items-center justify-center px-5">
-
+        <div className='flex flex-1 items-center justify-center px-5'>
           {/* 빈 상태 컨텐츠 (114:594 Container): col, center */}
-          <div className="flex flex-col items-center">
-
+          <div className='flex flex-col items-center'>
             {/* 아이콘 원형 배경
                 피그마 (114:595 Background): 56×56, #F3F4F6, rounded-full */}
-            <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">
-              <WarningIcon size={24} className="text-text-tertiary" />
+            <div className='flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]'>
+              <WarningIcon size={24} className='text-text-tertiary' />
             </div>
 
             {/* 텍스트 섹션
                 피그마 (114:598 Margin): pt-16px
                 피그마 (114:599 Container): col, gap-4px              */}
-            <div className="pt-4 flex flex-col items-center gap-1">
-              <p className="typography-body-lg text-text-primary">
+            <div className='pt-4 flex flex-col items-center gap-1'>
+              <p className='typography-body-lg text-text-primary'>
                 앨범이 비었어요
               </p>
-              <p className="typography-body-sm text-text-tertiary">
+              <p className='typography-body-sm text-text-tertiary'>
                 소중한 순간을 떠올려보세요
               </p>
             </div>
-
           </div>
         </div>
-
       </main>
 
       {/* ── FAB — 사진 등록 버튼 ─────────────────────────────────
           fixed 우하단, 56×56, bg-primary-soft(#333333), rounded-full */}
       <Link
         href={ROUTES.photoUpload}
-        aria-label="사진 등록"
-        className="fixed bottom-8 right-6 flex size-14 items-center justify-center rounded-full bg-primary-soft shadow-lg transition-opacity active:opacity-70"
+        aria-label='사진 등록'
+        className='fixed bottom-8 right-6 flex size-14 items-center justify-center rounded-full bg-primary-soft shadow-lg transition-opacity active:opacity-70'
       >
-        <PlusIcon size={24} className="text-white" />
+        <PlusIcon size={24} className='text-white' />
       </Link>
-
     </div>
   );
 }

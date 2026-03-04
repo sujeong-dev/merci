@@ -27,6 +27,8 @@ interface CommentInputProps {
   onSubmit: () => void;
   placeholder?: string;
   submitLabel?: string;
+  /** 좌측 CommentIcon 표시 여부 (기본값: true) */
+  showIcon?: boolean;
   className?: string;
 }
 
@@ -36,6 +38,7 @@ export function CommentInput({
   onSubmit,
   placeholder = '댓글을 입력해주세요',
   submitLabel = '등록하기',
+  showIcon = true,
   className,
 }: CommentInputProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -46,7 +49,7 @@ export function CommentInput({
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      <CommentIcon size={24} className="shrink-0 text-text-tertiary" />
+      {showIcon && <CommentIcon size={24} className="shrink-0 text-text-tertiary" />}
 
       <input
         value={value}
@@ -60,7 +63,7 @@ export function CommentInput({
         type="button"
         variant="gray"
         onClick={onSubmit}
-        className="w-[70px] shrink-0 typography-body-xs py-2"
+        className="shrink-0 typography-body-xs px-3 py-2"
       >
         {submitLabel}
       </Button>
