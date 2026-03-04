@@ -19,12 +19,12 @@ import { CopyIcon } from '@/shared/ui/icons';
  *   - Footer: 로그아웃 (caption, #9CA3AF, centered, absolute bottom)
  */
 
-const RELATIONSHIP_ROWS = [
-  ['아들', '딸', '며느리', '사위'],
-  ['손주', '형제', '자매', '기타'],
+const RELATIONSHIPS = [
+  '아들', '딸', '며느리', '사위',
+  '손주', '형제', '자매', '기타',
 ] as const;
 
-type Relationship = (typeof RELATIONSHIP_ROWS)[number][number];
+type Relationship = (typeof RELATIONSHIPS)[number];
 
 export function SettingsPage() {
   const [selectedRelation, setSelectedRelation] = useState<Relationship | null>(null);
@@ -45,20 +45,16 @@ export function SettingsPage() {
             어르신과의 관계
           </h2>
 
-          {/* Tab 버튼 2행 */}
-          <div className='flex flex-col gap-2'>
-            {RELATIONSHIP_ROWS.map((row, rowIdx) => (
-              <div key={rowIdx} className='flex gap-1'>
-                {row.map((rel) => (
-                  <Tab
-                    key={rel}
-                    active={selectedRelation === rel}
-                    onClick={() => setSelectedRelation(rel)}
-                  >
-                    {rel}
-                  </Tab>
-                ))}
-              </div>
+          {/* Tab 버튼 — 모바일: 2줄, 태블릿(768px~): 1줄 flex-wrap */}
+          <div className='flex flex-wrap gap-x-1 gap-y-2'>
+            {RELATIONSHIPS.map((rel) => (
+              <Tab
+                key={rel}
+                active={selectedRelation === rel}
+                onClick={() => setSelectedRelation(rel)}
+              >
+                {rel}
+              </Tab>
             ))}
           </div>
 

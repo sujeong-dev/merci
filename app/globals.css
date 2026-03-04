@@ -144,6 +144,11 @@
   --color-tint-warm:         var(--dt-color-tint-warm);         /* #FFF2EE */
   --color-tint-blue:         var(--dt-color-tint-blue);         /* #EEF5FF */
   --color-tint-orange-light: var(--dt-color-tint-orange-light); /* #FFF4E5 */
+
+  /* --------------------------------------------------
+     Layout  →  max-w-app
+     -------------------------------------------------- */
+  --max-width-app: 48rem; /* 768px — 태블릿 최대 너비 */
 }
 
 /* ============================================================

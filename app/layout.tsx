@@ -27,7 +27,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* 태블릿 최대 너비 컨테이너 — max-w-app(768px) 중앙 정렬 */}
+        <div className="mx-auto w-full max-w-app">
+          {children}
+        </div>
       </body>
     </html>
   );
