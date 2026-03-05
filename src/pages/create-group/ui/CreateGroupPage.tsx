@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCreateGroup } from '@/features/create-group';
 import { Button, Input, PageHeader } from '@/shared/ui';
 import { GroupCreatedModal } from './GroupCreatedModal';
 
@@ -11,14 +11,24 @@ import { GroupCreatedModal } from './GroupCreatedModal';
  * - 헤더: 뒤로가기 + 중앙 타이틀 (PageHeader)
  * - 본문: 안내 문구 + 성함 입력 필드 (Input)
  * - 하단: 확인 버튼 fixed (Button primary)
- * - 확인 버튼 → GroupCreatedModal 표시
+ * - 확인 버튼 → API 호출 → GroupCreatedModal 표시
  *
  * ## RSC 전략
- * 모달 open 상태(useState) 관리가 필요하므로 Client Component입니다.
- * PageHeader는 'use client' 내부 컴포넌트이므로 함수 prop 없이 사용 가능합니다.
+ * useCreateGroup 훅으로 폼 + API + 모달을 제어하므로 Client Component입니다.
  */
 export function CreateGroupPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {
+    elderName,
+    setElderName,
+    isPending,
+    error,
+    inviteCode,
+    isModalOpen,
+    handleSubmit,
+    closeModal,
+  } = useCreateGroup();
+
+  const isDisabled = !elderName.trim() || isPending;
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg-base">
@@ -47,7 +57,16 @@ export function CreateGroupPage() {
           label="어르신 성함"
           type="text"
           placeholder="성함을 입력해주세요"
+          value={elderName}
+          onChange={(e) => setElderName(e.target.value)}
         />
+
+        {/* 에러 메시지 */}
+        {error && (
+          <p className="mt-3 pl-1 typography-body-sm text-status-danger">
+            {error}
+          </p>
+        )}
 
       </main>
 
@@ -60,17 +79,18 @@ export function CreateGroupPage() {
           variant="primary"
           fullWidth
           className="h-[60px]"
-          onClick={() => setIsModalOpen(true)}
+          disabled={isDisabled}
+          onClick={handleSubmit}
         >
-          확인
+          {isPending ? '생성 중...' : '확인'}
         </Button>
       </div>
 
       {/* 그룹 생성 완료 모달 — node 6:1080 */}
       <GroupCreatedModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        inviteCode="MC-7294-AZ"
+        onClose={closeModal}
+        inviteCode={inviteCode ?? ''}
       />
 
     </div>

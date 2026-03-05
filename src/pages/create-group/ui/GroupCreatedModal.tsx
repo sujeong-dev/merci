@@ -6,6 +6,7 @@ import { CopyIcon, CheckIcon } from '@/shared/ui/icons';
 import { ModalSheet, SocialLoginButton } from '@/shared/ui';
 import { ROUTES } from '@/shared/config/routes';
 
+
 /**
  * 가족 그룹 생성 완료 모달
  *
@@ -18,6 +19,9 @@ import { ROUTES } from '@/shared/config/routes';
  *
  * ## 복사 버튼 동작
  * 복사 클립보드 성공 → CopyIcon을 CheckIcon(node 157:762)으로 교체 → 2초 후 원복
+ *
+ * ## 카카오톡 공유
+ * Kakao.Share.sendDefault() — text 템플릿으로 초대 코드 공유
  *
  * ## 재사용된 공통 컴포넌트
  * - SocialLoginButton (variant="kakao") — children으로 텍스트 오버라이드
@@ -46,6 +50,28 @@ export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedM
       setTimeout(() => setIsCopied(false), 2000);
     } catch {
       // clipboard 권한 거부 등 실패 시 상태 변경 없이 무시
+    }
+  };
+
+  const handleKakaoShare = () => {
+    try {
+      if (!window.Kakao || !window.Kakao.isInitialized()) {
+        alert('카카오톡 공유 기능을 초기화하지 못했습니다.');
+        return;
+      }
+      
+      const shareUrl = window.location.origin;
+
+      window.Kakao.Share.sendDefault({
+        objectType: 'text',
+        text: `마씨(Merci)에서 가족 그룹에 초대합니다!\n\n초대 코드: ${inviteCode}\n\n아래 링크에서 초대 코드를 입력하고 가족 앨범에 참여하세요.`,
+        link: {
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
+        },
+      });
+    } catch (error) {
+      alert(`카카오 공유 에러: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -113,8 +139,10 @@ export function GroupCreatedModal({ isOpen, onClose, inviteCode }: GroupCreatedM
               피그마: bg #FEE500, radius 10px, typography/body-lg-bold
               className으로 rounded-[10px], h-auto py-4 오버라이드     */}
           <SocialLoginButton
+            type="button"
             variant="kakao"
             className="rounded-[10px] h-auto py-4"
+            onClick={handleKakaoShare}
           >
             카카오로 초대 공유하기
           </SocialLoginButton>
