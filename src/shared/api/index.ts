@@ -1,4 +1,7 @@
 export { apiClient } from './instance';
 export { checkHealth } from './healthApi';
-export { createGroup, joinGroup } from './groupApi';
+export { createGroup, joinGroup, getMyGroup } from './groupApi';
+export type { GroupResponse, GroupMemberResponse } from './groupApi';
 export { getUserMe } from './userApi';
+export { listMemories } from './memoryApi';
+export type { MemoryResponse, ListMemoriesParams } from './memoryApi';

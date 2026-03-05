@@ -1,54 +1,93 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Select } from '@/shared/ui';
 import { PlusIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
+import { getMyGroup, listMemories } from '@/shared/api';
+import type { GroupMemberResponse, MemoryResponse } from '@/shared/api';
 
 /**
- * 사진 목록 — 목록 없음 (빈 상태)
+ * 사진 목록 페이지
  *
- * Figma: 마씨 › 사진 목록_목록 없음 (node 114:511)
- * 레이아웃: 375×812, bg-bg-base (#FAFAFA)
- *
- * ## 구조
- * 1. Status bar (y:0, h:44) — 브라우저/OS 처리
- * 2. <header> — 앱 수준 요소 (로고 + 설정 버튼)
- *    피그마 (9:234): row, space-between, padding 24px 20px
- *    pb-6 = 기존 header gap-6 역할 (로고↔그룹명 간격 24px)
- * 3. <main> — 페이지 컨텐츠
- *    3-1. 그룹명 + 필터 (9:240): col, gap-16px, px-20px
- *         pb-6 = 기존 header pb-6 역할 (필터↔빈상태 간격 24px)
- *         - 그룹명 "심복자 어르신네" (typography/h2)
- *         - 필터 pills: [기간 ▾] [작성자 ▾]
- *           pill: white, border #E5E7EB, rounded-full, py-2 px-4
- *    3-2. 빈 상태 컨텐츠 (114:594): flex-1, center
- *         - 56×56 원형 bg (#F3F4F6) + AddPictureIcon 24px
- *         - "앨범이 비었어요" (typography/body-lg)
- *         - "소중한 순간을 떠올려보세요" (typography/body-sm)
- *
- * ## 재사용된 공통 컴포넌트
- * - AddPictureIcon, SettingsIcon, ChevronDownIcon — shared/ui/icons
- * - typography-h2-logo, typography-h2, typography-body-lg/sm — globals.css
- * - text-text-primary/tertiary, bg-bg-base — 디자인 토큰
+ * Figma: 마씨 › 사진 목록 (node 9-210)
+ * - GET /groups/me  → 그룹명 + 멤버 목록
+ * - GET /memories   → 추억 목록 (기간/작성자 필터)
  */
+
+// 연도 옵션 생성 함수 (최신순)
+const getYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => {
+    const y = currentYear - i;
+    return { label: `${y}년`, value: String(y) };
+  });
+  return [{ label: '전체 기간', value: '' }, ...years];
+};
+
+const YEAR_OPTIONS = getYearOptions();
+
 export function PhotoListPage() {
-  const [period, setPeriod] = useState('');
-  const [author, setAuthor] = useState('');
+  const [groupName, setGroupName] = useState('');
+  const [members, setMembers] = useState<GroupMemberResponse[]>([]);
+  const [memories, setMemories] = useState<MemoryResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 필터 state
+  const [year, setYear] = useState('');       // 선택한 연도 string (ex: '2026')
+  const [authorId, setAuthorId] = useState(''); // 선택한 멤버의 user_id
+
+  // ── 그룹 정보 로드 (마운트 시 1회) ──────────────────────────
+  useEffect(() => {
+    getMyGroup()
+      .then((group) => {
+        setGroupName(group.name);
+        setMembers(group.members);
+      })
+      .catch(() => {
+        // 에러 시 빈 상태 유지
+      });
+  }, []);
+
+  // ── 추억 목록 로드 (마운트 + 필터 변경 시) ───────────────────
+  const fetchMemories = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await listMemories({
+        from_date: year ? `${year}-01-01` : undefined,
+        to_date: year ? `${year}-12-31` : undefined,
+        created_by: authorId || undefined,
+      });
+      setMemories(data);
+    } catch {
+      setMemories([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [year, authorId]);
+
+  useEffect(() => {
+    fetchMemories();
+  }, [fetchMemories]);
+
+  // 작성자 select options
+  const authorOptions = [
+    { label: '전체 작성자', value: '' },
+    ...members.map((m) => ({
+      label: m.name,
+      value: m.user_id,
+    })),
+  ];
 
   return (
     <div className='flex min-h-dvh flex-col bg-bg-base'>
-      {/* ── Header — 앱 수준 요소만 ───────────────────────────────
-          피그마 (9:234): row, space-between, padding 24px 20px
-          pb-6(24px) = 로고↔그룹명 간격 (기존 col gap-6 역할)       */}
+      {/* ── Header ──────────────────────────────────────────────
+          피그마 (9:234): row, space-between, padding 24px 20px   */}
       <header className='flex items-center justify-between px-5 py-2'>
-        {/* "마씨(Merci)" 로고 — typography/h2-logo (#111827) */}
-        <span className='typography-h2-logo text-text-primary'>
-          마씨(Merci)
-        </span>
+        <span className='typography-h2-logo text-text-primary'>마씨(Merci)</span>
 
-        {/* 설정 버튼 (9:237): 40×40, white, border #F3F4F6, shadow, rounded-full */}
         <Link
           href={ROUTES.settings}
           aria-label='설정'
@@ -58,59 +97,60 @@ export function PhotoListPage() {
         </Link>
       </header>
 
-      {/* ── Main ──────────────────────────────────────────────────*/}
+      {/* ── Main ──────────────────────────────────────────────── */}
       <main className='flex flex-1 flex-col pt-8 mx-5'>
-        {/* 그룹명 + 필터 (9:240): col, gap-16px
-            pb-6(24px) = 필터↔빈상태 간격 (기존 header pb-6 역할)   */}
+        {/* 그룹명 + 필터 */}
         <div className='flex flex-col gap-4 pb-6'>
-          {/* 그룹명 (9:242) — typography/h2 (#111827) */}
-          <h1 className='typography-h2 text-text-primary'>심복자 어르신네</h1>
+          {/* 그룹명: "{name} 어르신네" */}
+          <h1 className='typography-h2 text-text-primary'>
+            {groupName ? `${groupName} 어르신네` : '어르신네'}
+          </h1>
 
-          {/* 필터 pills (9:243): row, gap-8px */}
+          {/* 필터 pills */}
           <div className='flex items-center gap-2'>
             <Select
-              options={[]}
-              value={period}
-              placeholder='기간'
-              onChange={setPeriod}
+              options={YEAR_OPTIONS}
+              value={year}
+              onChange={setYear}
             />
             <Select
-              options={[]}
-              value={author}
-              placeholder='작성자'
-              onChange={setAuthor}
+              options={authorOptions}
+              value={authorId}
+              onChange={setAuthorId}
             />
           </div>
         </div>
 
-        {/* 빈 상태 영역: 나머지 공간 채우며 중앙 정렬
-            피그마 (114:512, layout_JA5S82): col, center, y:246     */}
-        <div className='flex flex-1 items-center justify-center px-5'>
-          {/* 빈 상태 컨텐츠 (114:594 Container): col, center */}
-          <div className='flex flex-col items-center'>
-            {/* 아이콘 원형 배경
-                피그마 (114:595 Background): 56×56, #F3F4F6, rounded-full */}
-            <div className='flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]'>
-              <WarningIcon size={24} className='text-text-tertiary' />
-            </div>
-
-            {/* 텍스트 섹션
-                피그마 (114:598 Margin): pt-16px
-                피그마 (114:599 Container): col, gap-4px              */}
-            <div className='pt-4 flex flex-col items-center gap-1'>
-              <p className='typography-body-lg text-text-primary'>
-                앨범이 비었어요
-              </p>
-              <p className='typography-body-sm text-text-tertiary'>
-                소중한 순간을 떠올려보세요
-              </p>
+        {/* ── 콘텐츠 영역: 로딩 / 빈 상태 / 카드 목록 ────────── */}
+        {isLoading ? (
+          /* 로딩 중 */
+          <div className='flex flex-1 items-center justify-center'>
+            <div className='size-8 animate-spin rounded-full border-4 border-[#E5E7EB] border-t-text-primary' />
+          </div>
+        ) : memories.length === 0 ? (
+          /* 빈 상태 (피그마 114:594) */
+          <div className='flex flex-1 items-center justify-center px-5'>
+            <div className='flex flex-col items-center'>
+              <div className='flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]'>
+                <WarningIcon size={24} className='text-text-tertiary' />
+              </div>
+              <div className='pt-4 flex flex-col items-center gap-1'>
+                <p className='typography-body-lg text-text-primary'>앨범이 비었어요</p>
+                <p className='typography-body-sm text-text-tertiary'>소중한 순간을 떠올려보세요</p>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          /* 추억 카드 목록 */
+          <div className='flex flex-col gap-4 pb-24'>
+            {memories.map((memory) => (
+              <MemoryCard key={memory.id} memory={memory} members={members} />
+            ))}
+          </div>
+        )}
       </main>
 
-      {/* ── FAB — 사진 등록 버튼 ─────────────────────────────────
-          fixed 우하단, 56×56, bg-primary-soft(#333333), rounded-full */}
+      {/* ── FAB — 사진 등록 버튼 ─────────────────────────────── */}
       <Link
         href={ROUTES.photoUpload}
         aria-label='사진 등록'
@@ -118,6 +158,88 @@ export function PhotoListPage() {
       >
         <PlusIcon size={24} className='text-white' />
       </Link>
+    </div>
+  );
+}
+
+// ── 추억 카드 컴포넌트 ─────────────────────────────────────────
+interface MemoryCardProps {
+  memory: MemoryResponse;
+  members: GroupMemberResponse[];
+}
+
+function MemoryCard({ memory, members }: MemoryCardProps) {
+  return (
+    <div className='overflow-hidden rounded-2xl bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.08)]'>
+      {/* 이미지 영역 */}
+      <div className='relative aspect-[335/233] w-full'>
+        <Image
+          src={memory.image_url}
+          alt={memory.title}
+          fill
+          className='object-cover'
+          sizes='(max-width: 768px) 100vw, 335px'
+        />
+
+        {/* 기억하심 뱃지 */}
+        {memory.has_badge && (
+          <span className='absolute left-3 top-3 flex items-center gap-1 rounded-full border border-[#F59E0B] bg-[#FFFBEB] px-2.5 py-1 text-xs font-medium text-[#D97706]'>
+            ☀ 기억하심
+          </span>
+        )}
+
+        {/* 음성 아이콘 */}
+        {memory.voice_url && (
+          <div className='absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-white/80 shadow'>
+            <svg
+              width='16'
+              height='16'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='text-text-primary'
+              aria-hidden='true'
+            >
+              <path d='M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z' />
+              <path d='M19 10v2a7 7 0 0 1-14 0v-2' />
+              <line x1='12' y1='19' x2='12' y2='22' />
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* 텍스트 영역 */}
+      <div className='px-4 py-3'>
+        <div className='flex items-start justify-between gap-2'>
+          <p className='typography-body-lg font-semibold text-text-primary line-clamp-1'>
+            {memory.title}
+          </p>
+          <span className='shrink-0 typography-body-sm text-text-tertiary'>{memory.year}년</span>
+        </div>
+        <div className='mt-1 flex items-center gap-1'>
+          <svg
+            width='14'
+            height='14'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            className='text-text-tertiary'
+            aria-hidden='true'
+          >
+            <path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2' />
+            <circle cx='12' cy='7' r='4' />
+          </svg>
+          <span className='typography-body-sm text-text-tertiary'>
+            {members.find((m) => m.user_id === memory.created_by)?.name ?? '알 수 없음'}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
