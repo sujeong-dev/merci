@@ -5,3 +5,8 @@ export async function createGroup(name: string): Promise<string> {
   const { data } = await apiClient.post<{ invite_code: string }>('/groups', { name });
   return data.invite_code;
 }
+
+/** 초대 코드로 가족 그룹 참여 */
+export async function joinGroup(inviteCode: string): Promise<void> {
+  await apiClient.post('/groups/join', { invite_code: inviteCode });
+}

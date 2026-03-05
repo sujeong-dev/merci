@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CopyIcon, CheckIcon } from '@/shared/ui/icons';
-import { Button, Input, ModalSheet, SocialLoginButton } from '@/shared/ui';
-import { ROUTES } from '@/shared/config/routes';
+import { Button, Input, ModalSheet } from '@/shared/ui';
+import { joinGroup } from '@/shared/api';
+import { isAxiosError } from 'axios';
 
 /**
  * 가족 그룹 생성 완료 모달
@@ -30,15 +30,39 @@ interface InviteCodeInputModalProps {
   isOpen: boolean;
   /** 모달 닫기 콜백 */
   onClose: () => void;
-  /** 표시할 초대 코드 */
-  inviteCode: string;
 }
 
-export function InviteCodeInputModal({ isOpen, onClose, inviteCode }: InviteCodeInputModalProps) {
+export function InviteCodeInputModal({ isOpen, onClose }: InviteCodeInputModalProps) {
   const router = useRouter();
+  const [inviteCode, setInviteCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCancel = () => {
     onClose();
+    setInviteCode('');
+    setErrorMessage('');
+  };
+
+  const handleSubmit = async () => {
+    if (!inviteCode.trim()) return;
+
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+      await joinGroup(inviteCode);
+      
+      router.push('/photo-list');
+      onClose();
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        setErrorMessage(error.response?.data?.detail || '해당 가족 그룹에 참여하실 수 없습니다.');
+      } else {
+        setErrorMessage('해당 가족 그룹에 참여하실 수 없습니다.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,7 +83,17 @@ export function InviteCodeInputModal({ isOpen, onClose, inviteCode }: InviteCode
             피그마 (6:1062 Margin): pb-40px
             (6:1063 Container): col, center, gap-8px               */}
         <div className='pb-10 flex flex-col items-center gap-2'>
-          <Input placeholder='예: MC-1234-AB' />
+          <Input 
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            placeholder='예: MC-1234-AB' 
+            disabled={isLoading}
+          />
+          {errorMessage && (
+            <span className='typography-body-sm text-status-destructive w-full text-left pl-2'>
+              {errorMessage}
+            </span>
+          )}
         </div>
 
         {/* ── 버튼 섹션 ─────────────────────────────────────────
@@ -73,7 +107,8 @@ export function InviteCodeInputModal({ isOpen, onClose, inviteCode }: InviteCode
             variant='primary'
             fullWidth
             className='h-[60px]'
-            onClick={() => onClose()}
+            onClick={handleSubmit}
+            disabled={isLoading || !inviteCode.trim()}
           >
             확인
           </Button>

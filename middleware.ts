@@ -1,7 +1,7 @@
-import { getUserMe } from '@/shared/api/userApi';
 import { NextRequest, NextResponse } from 'next/server';
 
 const SESSION_COOKIE = 'auth-session';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // 비로그인 전용 (로그인 상태면 홈으로)
 const PUBLIC_ONLY_PATHS = ['/'];
@@ -48,15 +48,28 @@ export async function middleware(request: NextRequest) {
     }
 
     // ── 그룹 소속 여부 가드 (home, create-group) ──────────────
-    if (['/home', '/create-group'].includes(pathname) && token && token !== '1') {
+    if (['/home', '/create-group'].includes(pathname)) {
       try {
-        const user = await getUserMe();
+        console.log(`[Middleware] ${pathname}: Checking group status...`);
+        
+        // Edge Runtime 호환을 위해 fetch 사용
+        const response = await fetch(`${BASE_URL}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-        if (user.group) {
-          return NextResponse.redirect(new URL('/photo-list', request.url));
+        if (response.ok) {
+          const user = await response.json();
+          console.log('[Middleware] User has group:', !!user.group);
+
+          if (user.group) {
+            return NextResponse.redirect(new URL('/photo-list', request.url));
+          }
         }
       } catch (error) {
-        console.error('Middleware fetch /users/me error:', error);
+        console.error('[Middleware] fetch /users/me error:', error);
       }
     }
 
