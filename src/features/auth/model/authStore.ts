@@ -3,8 +3,8 @@ import { persist } from 'zustand/middleware';
 
 const SESSION_COOKIE = 'auth-session';
 
-function setSessionCookie() {
-  document.cookie = `${SESSION_COOKIE}=1; path=/; SameSite=Lax`;
+function setSessionCookie(token: string) {
+  document.cookie = `${SESSION_COOKIE}=${token}; path=/; SameSite=Lax`;
 }
 
 function clearSessionCookie() {
@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       setTokens: (accessToken, refreshToken) => {
-        setSessionCookie();
+        setSessionCookie(accessToken);
         set({ accessToken, refreshToken });
       },
       clearTokens: () => {
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
       // 페이지 새로고침 시 localStorage 재수화 후 쿠키 동기화
       onRehydrateStorage: () => (state) => {
         if (state?.accessToken) {
-          setSessionCookie();
+          setSessionCookie(state.accessToken);
         } else {
           clearSessionCookie();
         }

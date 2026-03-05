@@ -1,3 +1,4 @@
+import { getUserMe } from '@/shared/api/userApi';
 import { NextRequest, NextResponse } from 'next/server';
 
 const SESSION_COOKIE = 'auth-session';
@@ -18,9 +19,10 @@ const AUTH_REQUIRED_PATHS = [
 // OAuth 콜백 — code 파라미터 없이 직접 접근 불가
 const OAUTH_CALLBACK_PATHS = ['/auth/kakao/callback', '/auth/naver/callback'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
-  const isLoggedIn = !!request.cookies.get(SESSION_COOKIE)?.value;
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  const isLoggedIn = !!token;
 
   // ── OAuth 콜백 ────────────────────────────────────────────
   // code 파라미터가 없으면 주소창 직접 입력으로 간주 → 랜딩으로
@@ -44,6 +46,20 @@ export function middleware(request: NextRequest) {
     if (!isLoggedIn) {
       return NextResponse.redirect(new URL('/', request.url));
     }
+
+    // ── 그룹 소속 여부 가드 (home, create-group) ──────────────
+    if (['/home', '/create-group'].includes(pathname) && token && token !== '1') {
+      try {
+        const user = await getUserMe();
+
+        if (user.group) {
+          return NextResponse.redirect(new URL('/photo-list', request.url));
+        }
+      } catch (error) {
+        console.error('Middleware fetch /users/me error:', error);
+      }
+    }
+
     return NextResponse.next();
   }
 
