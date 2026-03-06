@@ -1,49 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import { Accordion, CommentInput, PageHeader, ProgressBar } from '@/shared/ui';
-import { PlayIcon, RememberIcon, UnfamiliarIcon, VagueIcon } from '@/shared/ui/icons';
+import { PlayIcon, PauseIcon, RememberIcon, UnfamiliarIcon, VagueIcon } from '@/shared/ui/icons';
 import { cn } from '@/shared/lib/utils';
+import {
+  getMemory,
+  getRecalls,
+  createRecall,
+  getComments,
+  createComment,
+} from '@/shared/api';
+import type { MemoryResponse, CommentResponse, ReactionType } from '@/shared/api';
 
 /**
  * 사진 상세 — 기억의 기록
  *
  * Figma: 마씨 › 사진 상세 (node 19:439)
- * 레이아웃: 375×1749, bg: #FAFAFA
- *
- * ## 섹션 구성
- * 1. 사진 (420px, white card)
- * 2. 오디오 플레이어 (PlayIcon + ProgressBar + 시간)
- * 3. 추억 정보 — Accordion 토글 (연도·장소·인물·이야기)
- * 4. 어르신 반응 (3-option 선택 카드, RememberIcon/VagueIcon/UnfamiliarIcon)
- * 5. 가족들의 반응 (CommentIcon + 댓글 목록 + 입력창)
- *
- * ## 재사용된 공통 컴포넌트
- * - PageHeader (title="기억의 기록") — shared/ui
- * - Accordion (title="추억 정보") — shared/ui
- * - ProgressBar — shared/ui
- * - Button (variant="gray") — shared/ui
- * - PlayIcon, CommentIcon, RememberIcon, VagueIcon, UnfamiliarIcon — shared/ui/icons
+ * Props: memoryId — 동적 라우팅(/photo-detail/[id])에서 전달
  */
 
 const REACTIONS = [
   {
-    key: 'remember',
+    key: '기억하심' as ReactionType,
     label: '기억하심',
     Icon: RememberIcon,
-    /** 선택=on (Figma 132:544): bg·border·text 모두 status-remember 토큰 */
     selectedCard: 'bg-status-remember-bg border-status-remember',
     selectedText: 'text-status-remember',
   },
   {
-    key: 'vague',
+    key: '가물가물' as ReactionType,
     label: '가물가물',
     Icon: VagueIcon,
     selectedCard: 'bg-status-vague-bg border-status-vague',
     selectedText: 'text-status-vague',
   },
   {
-    key: 'unfamiliar',
+    key: '낯설어하심' as ReactionType,
     label: '낯설어하심',
     Icon: UnfamiliarIcon,
     selectedCard: 'bg-status-unfamiliar-bg border-status-unfamiliar',
@@ -51,157 +46,265 @@ const REACTIONS = [
   },
 ] as const;
 
-type ReactionKey = (typeof REACTIONS)[number]['key'];
-
-const COMMENTS = [
-  { id: 1, author: '김수지 (손녀)', time: '방금 전', text: '할머니가 한복 색깔까지 기억하셔서 정말 놀랐어요! 우리 다 같이 웃었네요. 🌸' },
-  { id: 2, author: '김수지', time: '방금 전', text: '할머니가 한복 색깔까지 기억하셔서 정말 놀랐어요! 우리 다 같이 웃었네요. 🌸' },
-];
-
-const INFO_ROWS = [
-  { label: '사진 연도', value: '1980년' },
-  { label: '사진 장소', value: '서울 남산타워 앞' },
-  { label: '함께한 인물', value: '김민수, 이영희, 박지민' },
-  { label: '사진 이야기', value: '할머니와 함께 남산타워에 올라가서 찍은 사진이에요. 이때 날씨가 참 맑아서 멀리까지 다 보였던 기억이 나네요.' },
-];
-
 export function PhotoDetailPage() {
-  const [reaction, setReaction] = useState<ReactionKey | null>(null);
-  const [comment, setComment] = useState('');
+  const params = useParams();
+  const memoryId = params?.id as string;
+  // ── 데이터 상태 ───────────────────────────────────────────────
+  const [memory, setMemory] = useState<MemoryResponse | null>(null);
+  const [reaction, setReaction] = useState<ReactionType | null>(null);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
+  const [commentInput, setCommentInput] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // ── 음성 플레이어 상태 ────────────────────────────────────────
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0); // 0~100
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // ── 초기 데이터 로드 ──────────────────────────────────────────
+  useEffect(() => {
+    Promise.all([
+      getMemory(memoryId),
+      getRecalls(memoryId),
+      getComments(memoryId),
+    ]).then(([mem, recalls, cmts]) => {
+      setMemory(mem);
+      setComments(cmts);
+      // 본인 반응이 있으면 초기 selected
+      if (recalls.length > 0) {
+        setReaction(recalls[0].result); // 목록의 첫 번째 항목이 현재 상태(최신순)
+      }
+    }).catch(() => {/* 에러 무시 */});
+  }, [memoryId]);
+
+  // ── 음성 플레이어 초기화 ──────────────────────────────────────
+  useEffect(() => {
+    if (!memory?.voice_url) return;
+
+    const audio = new Audio(memory.voice_url);
+
+    audio.onloadedmetadata = () => setAudioDuration(audio.duration);
+    audio.ontimeupdate = () => {
+      setAudioCurrentTime(audio.currentTime);
+      setAudioProgress(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0);
+    };
+    audio.onended = () => setIsPlaying(false);
+
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, [memory?.voice_url]);
+
+  const handleTogglePlay = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play();
+      setIsPlaying(true);
+    }
+  }, [isPlaying]);
+
+  const handleSeek = useCallback((ratio: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = ratio * audio.duration;
+  }, []);
+
+  // ── 시간 포맷 ─────────────────────────────────────────────────
+  function formatTime(seconds: number): string {
+    if (!isFinite(seconds)) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  // ── 어르신 반응 처리 ──────────────────────────────────────────
+  const handleReaction = useCallback(async (key: ReactionType) => {
+    // 낙관적 업데이트
+    setReaction(key);
+    try {
+      await createRecall(memoryId, key);
+    } catch {
+      // 실패 시 롤백하지 않음 (UX 우선)
+    }
+  }, [memoryId]);
+
+  // ── 댓글 제출 ─────────────────────────────────────────────────
+  const handleCommentSubmit = useCallback(async () => {
+    const trimmed = commentInput.trim();
+    if (!trimmed || isSubmittingComment) return;
+
+    setIsSubmittingComment(true);
+    try {
+      await createComment(memoryId, trimmed);
+      setCommentInput('');
+      // 목록 재조회
+      const updated = await getComments(memoryId);
+      setComments(updated);
+    } catch {
+      // 에러 무시
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  }, [memoryId, commentInput, isSubmittingComment]);
+
+  // ── 추억 정보 rows ────────────────────────────────────────────
+  const infoRows = memory
+    ? [
+        { label: '사진 연도', value: `${memory.year}년` },
+        { label: '사진 장소', value: memory.location },
+        { label: '함께한 인물', value: memory.people },
+        { label: '사진 이야기', value: memory.story },
+      ]
+    : [];
 
   return (
     <div className='flex min-h-dvh flex-col bg-bg-base'>
-      {/* ── Header (120:800): sticky, h:56px, centered title ────────*/}
+      {/* ── Header ─────────────────────────────────────────────── */}
       <PageHeader title='기억의 기록' />
 
-      {/* ── Main (19:441): col, gap:20px, px:20px ───────────────────*/}
+      {/* ── Main ───────────────────────────────────────────────── */}
       <main className='flex flex-col gap-5 px-5 pt-6 pb-10'>
-        {/* ── 사진 (19:442): 420px, white, shadow, rounded-10 ─────────
-            Section:margin wrapper pb:16px                          */}
+
+        {/* 사진 */}
         <div className='pb-4'>
-          <div className='h-[420px] w-full rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]' />
+          <div className='flex items-center justify-center relative h-[420px] w-full overflow-hidden rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
+            {memory?.image_url && (
+              <img
+                src={memory.image_url}
+                alt={memory.title}
+                className='object-cover'
+              />
+            )}
+          </div>
         </div>
 
-        {/* ── 오디오 플레이어 (19:445): row, center, gap:16px ─────────
-            Play(40×40) + ProgressBar(fill) + time                  */}
-        <div className='flex items-center gap-4'>
-          <button
-            type='button'
-            aria-label='재생'
-            className='flex size-10 shrink-0 items-center justify-center rounded-full border border-[#F3F4F6] bg-white shadow-[0px_2px_8px_0px_rgba(0,0,0,0.06)]'
-          >
-            <PlayIcon size={20} className='text-text-primary' />
-          </button>
+        {/* 음성 플레이어 — voice_url이 있을 때만 표시 */}
+        {memory?.voice_url && (
+          <div className='flex items-center gap-4'>
+            <button
+              type='button'
+              aria-label={isPlaying ? '일시정지' : '재생'}
+              onClick={handleTogglePlay}
+              className='flex size-10 shrink-0 items-center justify-center rounded-full border border-[#F3F4F6] bg-white shadow-[0px_2px_8px_0px_rgba(0,0,0,0.06)]'
+            >
+              {isPlaying ? (
+                <PauseIcon size={56} className='text-text-primary' />
+              ) : (
+                <PlayIcon size={56} className='text-text-primary' />
+              )}
+            </button>
 
-          <ProgressBar value={30} className='flex-1' />
+            <ProgressBar
+              value={audioProgress}
+              className='flex-1'
+              onClick={handleSeek}
+            />
 
-          <span className='typography-caption-medium shrink-0 text-text-subtle'>
-            0:45
-          </span>
-        </div>
+            <span className='typography-caption-medium shrink-0 text-text-subtle'>
+              {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
+            </span>
+          </div>
+        )}
 
-        {/* ── 추억 정보 (19:543): Accordion 토글 ─────────────────────
-            펼치면 bg:#F3F4F6 카드, rounded-10, p:20px, gap:20px    */}
+        {/* 추억 정보 Accordion */}
         <Accordion title='추억 정보' defaultOpen>
           <div className='flex flex-col gap-5 rounded-[10px] bg-[#F3F4F6] p-5'>
-            {INFO_ROWS.map(({ label, value }) => (
+            {infoRows.map(({ label, value }) => (
               <div key={label} className='flex flex-col gap-1'>
-                <span className='typography-body-sm-bold text-text-primary'>
-                  {label}
-                </span>
-                <span className='typography-body-sm text-text-primary'>
-                  {value}
-                </span>
+                <span className='typography-body-sm-bold text-text-primary'>{label}</span>
+                <span className='typography-body-sm text-text-primary'>{value}</span>
               </div>
             ))}
           </div>
         </Accordion>
 
-        {/* ── 어르신 반응 (19:558) ────────────────────────────────────
-            heading pb:16px + 3-column 선택 카드                    */}
+        {/* 어르신 반응 */}
         <div>
           <h2 className='typography-body-sm-bold text-text-primary pb-4'>
             오늘 어르신의 반응은 어떠셨나요?
           </h2>
 
-          {/* 반응 카드 3개 (120:985): row, gap:12px ─────────────────
-              각 카드: col, center, rounded-24px, white, shadow, py:24px px:4px */}
           <div className='flex gap-3'>
-            {REACTIONS.map(
-              ({ key, label, Icon, selectedCard, selectedText }) => {
-                const isSelected = reaction === key;
-                return (
-                  <button
-                    key={key}
-                    type='button'
-                    onClick={() => setReaction(key)}
+            {REACTIONS.map(({ key, label, Icon, selectedCard, selectedText }) => {
+              const isSelected = reaction === key;
+              return (
+                <button
+                  key={key}
+                  type='button'
+                  onClick={() => handleReaction(key)}
+                  className={cn(
+                    'flex flex-1 flex-col items-center rounded-[24px] border border-transparent bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
+                    isSelected && selectedCard,
+                  )}
+                >
+                  <span className='pb-3'>
+                    <Icon size={48} />
+                  </span>
+                  <span
                     className={cn(
-                      /* 선택=off: border 공간 미리 확보(transparent)해서 레이아웃 시프트 방지 */
-                      'flex flex-1 flex-col items-center rounded-[24px] border border-transparent bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
-                      /* 선택=on: 반응별 bg·border-color 토큰 적용 */
-                      isSelected && selectedCard,
+                      'typography-body-sm-bold',
+                      isSelected ? selectedText : 'text-text-primary',
                     )}
                   >
-                    {/* 반응 아이콘 (48px, pb:12px) */}
-                    <span className='pb-3'>
-                      <Icon size={48} />
-                    </span>
-                    <span
-                      className={cn(
-                        'typography-body-sm-bold',
-                        /* 선택=off: text-primary / 선택=on: 반응별 text 토큰 */
-                        isSelected ? selectedText : 'text-text-primary',
-                      )}
-                    >
-                      {label}
-                    </span>
-                  </button>
-                );
-              },
-            )}
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* ── 가족들의 반응 (19:479): pb:24px ────────────────────────*/}
+        {/* 가족들의 반응 (댓글) */}
         <div className='pb-6'>
-          {/* 카드 (19:480): col, py:24px px:16px, white, shadow, rounded-16px */}
           <div className='flex flex-col rounded-[16px] bg-white px-4 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
-            {/* 헤더 (19:481): "가족들의 반응" pb:20px */}
             <div className='pb-5'>
-              <span className='typography-body-sm-bold text-text-primary]'>
+              <span className='typography-body-sm-bold text-text-primary'>
                 가족들의 반응
               </span>
             </div>
 
-            {/* 댓글 목록 (19:485): col, gap:24px */}
-            <div className='flex flex-col gap-6'>
-              {COMMENTS.map(({ id, author, time, text }) => (
-                <div key={id} className='flex flex-1 flex-col gap-1'>
-                  {/* 작성자 + 시간 */}
-                  <div className='flex items-center justify-between'>
-                    <span className='typography-body-xs-semibold text-text-primary'>
-                      {author}
-                    </span>
-                    <span className='typography-micro text-[#767676]'>
-                      {time}
-                    </span>
+            {/* 댓글 목록 */}
+            {comments.length > 0 ? (
+              <div className='flex flex-col gap-6'>
+                {comments.map((c) => (
+                  <div key={c.id} className='flex flex-1 flex-col gap-1'>
+                    <div className='flex items-center justify-between'>
+                      <span className='typography-body-xs-semibold text-text-primary'>
+                        {c.author_name}
+                      </span>
+                      <span className='typography-micro text-[#767676]'>
+                        {new Date(c.created_at).toLocaleDateString('ko-KR', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <div className='rounded-[16px] bg-[#FAFAFA] px-3 py-3'>
+                      <p className='typography-body-xs text-text-primary'>{c.content}</p>
+                    </div>
                   </div>
+                ))}
+              </div>
+            ) : (
+              <p className='typography-body-sm text-text-tertiary text-center py-4'>
+                아직 반응이 없어요. 첫 번째로 남겨보세요!
+              </p>
+            )}
 
-                  {/* 말풍선 (19:494): bg:#FAFAFA, rounded-16px, px:12px py:11.56px */}
-                  <div className='rounded-[16px] bg-[#FAFAFA] px-3 py-3'>
-                    <p className='typography-body-xs text-text-primary'>
-                      {text}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* 입력 영역 (19:506): pt:24px */}
+            {/* 댓글 입력 */}
             <CommentInput
-              value={comment}
-              onChange={setComment}
-              onSubmit={() => setComment('')}
+              value={commentInput}
+              onChange={setCommentInput}
+              onSubmit={handleCommentSubmit}
               placeholder='어르신의 반응을 공유해주세요'
               className='pt-6'
             />

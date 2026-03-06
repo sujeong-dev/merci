@@ -43,6 +43,12 @@ export async function listMemories(params?: ListMemoriesParams): Promise<MemoryR
   return data;
 }
 
+/** 추억 상세 조회 */
+export async function getMemory(memoryId: string): Promise<MemoryResponse> {
+  const { data } = await apiClient.get<MemoryResponse>(`/memories/${memoryId}`);
+  return data;
+}
+
 /** 파일 업로드용 Presigned URL 발급 */
 export async function getPresignedUrl(
   fileType: 'image' | 'voice',

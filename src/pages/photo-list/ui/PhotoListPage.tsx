@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Select } from '@/shared/ui';
-import { PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
+import { MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
 import { getMyGroup, listMemories } from '@/shared/api';
 import type { GroupMemberResponse, MemoryResponse } from '@/shared/api';
@@ -171,7 +171,10 @@ interface MemoryCardProps {
 
 function MemoryCard({ memory, members }: MemoryCardProps) {
   return (
-    <div className='overflow-hidden rounded-2xl bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.08)]'>
+    <Link
+      href={ROUTES.photoDetail(memory.id)}
+      className='block overflow-hidden rounded-2xl bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.08)]'
+    >
       {/* 이미지 영역 */}
       <div className='relative aspect-[335/233] w-full'>
         <img
@@ -181,6 +184,10 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
           sizes='(max-width: 768px) 100vw, 335px'
         />
 
+        <div className='absolute top-4 right-4'>
+            <MoreIcon size={28} className='text-text-primary' />
+        </div>
+
         {/* 기억하심 뱃지 */}
         {memory.has_badge && (
           <RememberIcon />
@@ -188,8 +195,8 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
 
         {/* 음성 아이콘 */}
         {memory.voice_url && (
-          <div className='absolute bottom-4 right-3'>
-            <RecordingIcon size={24} className='text-text-primary' />
+          <div className='absolute bottom-4 right-4'>
+            <RecordingIcon size={28} className='text-text-primary' />
           </div>
         )}
       </div>
@@ -223,6 +230,6 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -85,11 +85,10 @@ export function HomePage() {
               </p>
             </div>
 
-             {/* 그룹 생성 완료 모달 — node 6:1080 */}
+             {/* 초대 코드 입력 모달 */}
                   <InviteCodeInputModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    inviteCode="MC-7294-AZ"
                   />
           </div>
         </div>
