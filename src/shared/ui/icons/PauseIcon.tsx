@@ -5,16 +5,9 @@ interface IconProps {
 
 export function PauseIcon({ size = 24, className }: IconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <rect x="5" y="4" width="4" height="16" rx="1" fill="currentColor" />
-      <rect x="15" y="4" width="4" height="16" rx="1" fill="currentColor" />
+    <svg width={size} height={size} viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M0 28C0 12.536 12.536 0 28 0V0C43.464 0 56 12.536 56 28V28C56 43.464 43.464 56 28 56V56C12.536 56 0 43.464 0 28V28Z" fill="#111827" />
+      <path d="M30.8 35V21H35V35H30.8ZM21 35V31.8V28.6V21H25.2V35H21Z" fill="white" />
     </svg>
   );
 }

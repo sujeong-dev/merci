@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { apiClient } from './instance';
 
 export interface MemoryResponse {
@@ -21,8 +22,56 @@ export interface ListMemoriesParams {
   created_by?: string; // user_id (uuid)
 }
 
+export interface PresignedUrlResponse {
+  upload_url: string;
+  object_key: string;
+}
+
+export interface MemoryCreateRequest {
+  title: string;
+  image_key: string;
+  year: number;
+  location: string;
+  people: string;
+  story: string;
+  voice_key?: string;
+}
+
 /** 추억 목록 조회 — 그룹 추억 리스트 (필터 옵션: 기간, 작성자) */
 export async function listMemories(params?: ListMemoriesParams): Promise<MemoryResponse[]> {
   const { data } = await apiClient.get<MemoryResponse[]>('/memories', { params });
+  return data;
+}
+
+/** 파일 업로드용 Presigned URL 발급 */
+export async function getPresignedUrl(
+  fileType: 'image' | 'voice',
+  contentType: string,
+): Promise<PresignedUrlResponse> {
+  const { data } = await apiClient.post<PresignedUrlResponse>('/uploads/presigned-url', {
+    file_type: fileType,
+    content_type: contentType,
+  });
+  return data;
+}
+
+/**
+ * Presigned URL로 파일 직접 업로드 (PUT)
+ * Authorization 헤더를 포함하면 R2가 SignatureDoesNotMatch 오류를 반환하므로
+ * apiClient를 사용하지 않고 별도 axios 인스턴스를 사용합니다.
+ */
+export async function uploadToPresignedUrl(
+  uploadUrl: string,
+  file: Blob,
+  contentType: string,
+): Promise<void> {
+  await axios.put(uploadUrl, file, {
+    headers: { 'Content-Type': contentType },
+  });
+}
+
+/** 추억 등록 */
+export async function createMemory(params: MemoryCreateRequest): Promise<MemoryResponse> {
+  const { data } = await apiClient.post<MemoryResponse>('/memories', params);
   return data;
 }
