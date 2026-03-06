@@ -28,6 +28,9 @@ export const ROUTES = {
   /** 사진 상세 — 기억의 기록 (동적: /photo-detail/{id}) */
   photoDetail: (id: string) => `/photo-detail/${id}`,
 
+  /** 사진 수정 — 기억 수정하기 (동적: /photo-detail/{id}/edit) */
+  photoEdit: (id: string) => `/photo-detail/${id}/edit`,
+
   /** 설정 — 어르신 관계 및 가족 초대 코드 */
   settings: '/settings',
 

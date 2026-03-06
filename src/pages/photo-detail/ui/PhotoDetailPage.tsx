@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Accordion, CommentInput, PageHeader, ProgressBar } from '@/shared/ui';
-import { PlayIcon, PauseIcon, RememberIcon, UnfamiliarIcon, VagueIcon } from '@/shared/ui/icons';
+import { EditIcon, PlayIcon, PauseIcon, RememberIcon, UnfamiliarIcon, VagueIcon } from '@/shared/ui/icons';
 import { cn } from '@/shared/lib/utils';
+import { ROUTES } from '@/shared/config/routes';
 import {
   getMemory,
   getRecalls,
@@ -47,6 +48,7 @@ const REACTIONS = [
 ] as const;
 
 export function PhotoDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const memoryId = params?.id as string;
   // ── 데이터 상태 ───────────────────────────────────────────────
@@ -169,7 +171,19 @@ export function PhotoDetailPage() {
   return (
     <div className='flex min-h-dvh flex-col bg-bg-base'>
       {/* ── Header ─────────────────────────────────────────────── */}
-      <PageHeader title='기억의 기록' />
+      <PageHeader
+        title='기억의 기록'
+        right={
+          <button
+            type='button'
+            aria-label='수정'
+            onClick={() => router.push(ROUTES.photoEdit(memoryId))}
+            className='flex size-10 items-center justify-center p-2 active:opacity-70'
+          >
+            <EditIcon size={20} className='text-text-primary' />
+          </button>
+        }
+      />
 
       {/* ── Main ───────────────────────────────────────────────── */}
       <main className='flex flex-col gap-5 px-5 pt-6 pb-10'>

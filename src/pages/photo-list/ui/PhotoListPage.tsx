@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Select } from '@/shared/ui';
-import { MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
+import { EditIcon, DeleteIcon, MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
 import { getMyGroup, listMemories } from '@/shared/api';
 import type { GroupMemberResponse, MemoryResponse } from '@/shared/api';
 import { RecordingIcon } from '@/shared/ui/icons/Recording';
+import { useRouter } from 'next/navigation';
+import { DeleteConfirmModal } from '@/features/memory-delete/ui/DeleteConfirmModal';
 
 /**
  * 사진 목록 페이지
@@ -31,14 +32,19 @@ const getYearOptions = () => {
 const YEAR_OPTIONS = getYearOptions();
 
 export function PhotoListPage() {
+  const router = useRouter();
   const [groupName, setGroupName] = useState('');
   const [members, setMembers] = useState<GroupMemberResponse[]>([]);
   const [memories, setMemories] = useState<MemoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // 필터 state
-  const [year, setYear] = useState('');       // 선택한 연도 string (ex: '2026')
-  const [authorId, setAuthorId] = useState(''); // 선택한 멤버의 user_id
+  const [year, setYear] = useState('');
+  const [authorId, setAuthorId] = useState('');
+
+  // 삭제 모달 state
+  const [deleteTarget, setDeleteTarget] = useState<MemoryResponse | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // ── 그룹 정보 로드 (마운트 시 1회) ──────────────────────────
   useEffect(() => {
@@ -145,7 +151,15 @@ export function PhotoListPage() {
           /* 추억 카드 목록 */
           <div className='flex flex-col gap-4 pb-24'>
             {memories.map((memory) => (
-              <MemoryCard key={memory.id} memory={memory} members={members} />
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                members={members}
+                isMenuOpen={openMenuId === memory.id}
+                onMenuToggle={(id) => setOpenMenuId((prev) => (prev === id ? null : id))}
+                onEdit={(m) => { setOpenMenuId(null); router.push(ROUTES.photoEdit(m.id)); }}
+                onDelete={(m) => { setOpenMenuId(null); setDeleteTarget(m); }}
+              />
             ))}
           </div>
         )}
@@ -159,6 +173,17 @@ export function PhotoListPage() {
       >
         <PlusIcon size={24} className='text-white' />
       </Link>
+
+
+      {/* ── 삭제 확인 모달 ───────────────────────────────────── */}
+      {deleteTarget && (
+        <DeleteConfirmModal
+          memory={deleteTarget}
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onSuccess={() => { setDeleteTarget(null); fetchMemories(); }}
+        />
+      )}
     </div>
   );
 }
@@ -167,31 +192,74 @@ export function PhotoListPage() {
 interface MemoryCardProps {
   memory: MemoryResponse;
   members: GroupMemberResponse[];
+  isMenuOpen: boolean;
+  onMenuToggle: (id: string) => void;
+  onEdit: (memory: MemoryResponse) => void;
+  onDelete: (memory: MemoryResponse) => void;
 }
 
-function MemoryCard({ memory, members }: MemoryCardProps) {
+function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelete }: MemoryCardProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 외부 클릭 시 메뉴 닫기
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onMenuToggle(memory.id);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen, memory.id, onMenuToggle]);
+
   return (
-    <Link
-      href={ROUTES.photoDetail(memory.id)}
-      className='block overflow-hidden rounded-2xl bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.08)]'
-    >
-      {/* 이미지 영역 */}
-      <div className='relative aspect-[335/233] w-full'>
+    <div className='relative overflow-hidden rounded-2xl bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.08)]'>
+      {/* 더보기 메뉴 — 카드 우측 상단 고정 */}
+      <div ref={menuRef} className='absolute right-3 top-3 z-30'>
+        <button
+          type='button'
+          aria-label='더보기'
+          onClick={(e) => {
+            e.preventDefault();
+            onMenuToggle(memory.id);
+          }}
+          className='flex items-center justify-center'
+        >
+          <MoreIcon size={28} />
+        </button>
+        {isMenuOpen && (
+          <div className='absolute right-0 top-8 z-20 flex flex-col rounded-xl bg-white py-1 shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]'>
+            <button
+              type='button'
+              onClick={() => onEdit(memory)}
+              className='flex items-center gap-2 px-4 py-3 typography-body-sm text-text-primary hover:bg-[#F9FAFB] whitespace-nowrap'
+            >
+              <EditIcon size={14} />
+              수정
+            </button>
+            <button
+              type='button'
+              onClick={() => onDelete(memory)}
+              className='flex items-center gap-2 px-4 py-3 typography-body-sm text-red-500 hover:bg-[#FFF5F5] whitespace-nowrap'
+            >
+              <DeleteIcon size={14} />
+              삭제
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 이미지 영역 — Link로 감싸 상세페이지 이동 */}
+      <Link href={ROUTES.photoDetail(memory.id)} className='block relative aspect-[335/233] w-full overflow-hidden'>
         <img
           src={memory.image_url}
           alt={memory.title}
-          className='object-cover'
-          sizes='(max-width: 768px) 100vw, 335px'
+          className='h-full w-full object-cover'
         />
 
-        <div className='absolute top-4 right-4'>
-            <MoreIcon size={28} className='text-text-primary' />
-        </div>
-
         {/* 기억하심 뱃지 */}
-        {memory.has_badge && (
-          <RememberIcon />
-        )}
+        {memory.has_badge && <RememberIcon />}
 
         {/* 음성 아이콘 */}
         {memory.voice_url && (
@@ -199,7 +267,7 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
             <RecordingIcon size={28} className='text-text-primary' />
           </div>
         )}
-      </div>
+      </Link>
 
       {/* 텍스트 영역 */}
       <div className='px-4 py-3'>
@@ -207,21 +275,12 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
           <p className='typography-body-lg font-semibold text-text-primary line-clamp-1'>
             {memory.title}
           </p>
-          <span className='shrink-0 typography-body-sm text-text-tertiary'>{memory.year}년</span>
+          <div className='flex items-center gap-2 shrink-0'>
+            <span className='typography-body-sm text-text-tertiary'>{memory.year}년</span>
+          </div>
         </div>
         <div className='mt-1 flex items-center gap-1'>
-          <svg
-            width='14'
-            height='14'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            className='text-text-tertiary'
-            aria-hidden='true'
-          >
+          <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className='text-text-tertiary' aria-hidden='true'>
             <path d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2' />
             <circle cx='12' cy='7' r='4' />
           </svg>
@@ -230,6 +289,6 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -23,7 +23,6 @@ export async function createRecall(
 ): Promise<RecallResponse> {
   const { data } = await apiClient.post<RecallResponse>(`/memories/${memoryId}/recalls`, {
     result,
-    visited_at: new Date().toISOString(),
   });
   return data;
 }

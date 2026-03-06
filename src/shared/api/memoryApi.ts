@@ -37,6 +37,16 @@ export interface MemoryCreateRequest {
   voice_key?: string;
 }
 
+export interface MemoryUpdateRequest {
+  title?: string;
+  image_key?: string;
+  year?: number;
+  location?: string;
+  people?: string;
+  story?: string;
+  voice_key?: string | null;
+}
+
 /** 추억 목록 조회 — 그룹 추억 리스트 (필터 옵션: 기간, 작성자) */
 export async function listMemories(params?: ListMemoriesParams): Promise<MemoryResponse[]> {
   const { data } = await apiClient.get<MemoryResponse[]>('/memories', { params });
@@ -80,4 +90,18 @@ export async function uploadToPresignedUrl(
 export async function createMemory(params: MemoryCreateRequest): Promise<MemoryResponse> {
   const { data } = await apiClient.post<MemoryResponse>('/memories', params);
   return data;
+}
+
+/** 추억 수정 (PATCH) */
+export async function updateMemory(
+  memoryId: string,
+  params: MemoryUpdateRequest,
+): Promise<MemoryResponse> {
+  const { data } = await apiClient.patch<MemoryResponse>(`/memories/${memoryId}`, params);
+  return data;
+}
+
+/** 추억 삭제 (DELETE 204) */
+export async function deleteMemory(memoryId: string): Promise<void> {
+  await apiClient.delete(`/memories/${memoryId}`);
 }
