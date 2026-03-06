@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Select } from '@/shared/ui';
-import { PlusIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
+import { PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
 import { getMyGroup, listMemories } from '@/shared/api';
 import type { GroupMemberResponse, MemoryResponse } from '@/shared/api';
+import { RecordingIcon } from '@/shared/ui/icons/Recording';
 
 /**
  * 사진 목록 페이지
@@ -173,40 +174,22 @@ function MemoryCard({ memory, members }: MemoryCardProps) {
     <div className='overflow-hidden rounded-2xl bg-white shadow-[0px_1px_4px_0px_rgba(0,0,0,0.08)]'>
       {/* 이미지 영역 */}
       <div className='relative aspect-[335/233] w-full'>
-        <Image
+        <img
           src={memory.image_url}
           alt={memory.title}
-          fill
           className='object-cover'
           sizes='(max-width: 768px) 100vw, 335px'
         />
 
         {/* 기억하심 뱃지 */}
         {memory.has_badge && (
-          <span className='absolute left-3 top-3 flex items-center gap-1 rounded-full border border-[#F59E0B] bg-[#FFFBEB] px-2.5 py-1 text-xs font-medium text-[#D97706]'>
-            ☀ 기억하심
-          </span>
+          <RememberIcon />
         )}
 
         {/* 음성 아이콘 */}
         {memory.voice_url && (
-          <div className='absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-full bg-white/80 shadow'>
-            <svg
-              width='16'
-              height='16'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              className='text-text-primary'
-              aria-hidden='true'
-            >
-              <path d='M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z' />
-              <path d='M19 10v2a7 7 0 0 1-14 0v-2' />
-              <line x1='12' y1='19' x2='12' y2='22' />
-            </svg>
+          <div className='absolute bottom-4 right-3'>
+            <RecordingIcon size={24} className='text-text-primary' />
           </div>
         )}
       </div>
