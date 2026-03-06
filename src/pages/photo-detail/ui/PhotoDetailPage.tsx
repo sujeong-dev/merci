@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Accordion, CommentInput, PageHeader, ProgressBar } from '@/shared/ui';
+import { Accordion, CommentInput, PageHeader, ProgressBar, Button } from '@/shared/ui';
 import { EditIcon, PlayIcon, PauseIcon, RememberIcon, UnfamiliarIcon, VagueIcon } from '@/shared/ui/icons';
 import { cn } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/config/routes';
@@ -294,6 +294,7 @@ export function PhotoDetailPage() {
                     <div className='flex items-center justify-between'>
                       <span className='typography-body-xs-semibold text-text-primary'>
                         {c.author_name}
+                        {c.relation && `(${c.relation})`}
                       </span>
                       <span className='typography-micro text-[#767676]'>
                         {new Date(c.created_at).toLocaleDateString('ko-KR', {
@@ -323,6 +324,18 @@ export function PhotoDetailPage() {
               className='pt-6'
             />
           </div>
+        </div>
+
+        {/* 목록으로 이동 버튼 */}
+        <div className='pt-4 pb-10'>
+          <Button
+            variant='gray'
+            fullWidth
+            onClick={() => router.push(ROUTES.photoList)}
+            className='h-[52px] typography-body-sm-bold'
+          >
+            목록으로
+          </Button>
         </div>
       </main>
     </div>

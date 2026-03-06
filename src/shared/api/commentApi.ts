@@ -6,6 +6,7 @@ export interface CommentResponse {
   content: string;
   author_name: string;
   created_at: string;
+  relation: string;
 }
 
 /** 댓글 목록 조회 */

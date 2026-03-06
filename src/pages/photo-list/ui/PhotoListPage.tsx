@@ -63,8 +63,8 @@ export function PhotoListPage() {
     setIsLoading(true);
     try {
       const data = await listMemories({
-        from_date: year ? `${year}-01-01` : undefined,
-        to_date: year ? `${year}-12-31` : undefined,
+        from_date: year || undefined,
+        to_date: year|| undefined,
         created_by: authorId || undefined,
       });
       setMemories(data);
@@ -259,7 +259,14 @@ function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelet
         />
 
         {/* 기억하심 뱃지 */}
-        {memory.has_badge && <RememberIcon />}
+        {memory.has_badge && (
+          <div className='absolute top-4 left-4'>
+            <div className='flex items-center gap-1 bg-status-remember-bg px-2 py-1 rounded-md border-2 border-status-remember'>
+              <RememberIcon size={24} className='text-status-remember' />
+              <span className='typography-body-xs-semibold text-status-remember'>기억하심</span>
+            </div>
+          </div>
+        )}
 
         {/* 음성 아이콘 */}
         {memory.voice_url && (

@@ -7,7 +7,7 @@ export function RememberIcon({ size = 48, className }: IconProps) {
   return (
     <svg
       width={size}
-      height={(size * 54) / 51}
+      height={size}
       viewBox="0 0 51 54"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
