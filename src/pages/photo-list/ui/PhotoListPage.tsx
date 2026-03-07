@@ -151,7 +151,7 @@ export function PhotoListPage() {
         ) : (
           /* 추억 카드 목록 */
           <div className='flex flex-col gap-4 pb-24'>
-            {memories.map((memory) => (
+            {memories.map((memory, index) => (
               <MemoryCard
                 key={memory.id}
                 memory={memory}
@@ -160,6 +160,7 @@ export function PhotoListPage() {
                 onMenuToggle={(id) => setOpenMenuId((prev) => (prev === id ? null : id))}
                 onEdit={(m) => { setOpenMenuId(null); router.push(ROUTES.photoEdit(m.id)); }}
                 onDelete={(m) => { setOpenMenuId(null); setDeleteTarget(m); }}
+                priority={index === 0}
               />
             ))}
           </div>
@@ -197,9 +198,11 @@ interface MemoryCardProps {
   onMenuToggle: (id: string) => void;
   onEdit: (memory: MemoryResponse) => void;
   onDelete: (memory: MemoryResponse) => void;
+  /** 첫 번째 카드 이미지에만 true — LCP 최적화 */
+  priority?: boolean;
 }
 
-function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelete }: MemoryCardProps) {
+function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelete, priority = false }: MemoryCardProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // 외부 클릭 시 메뉴 닫기
@@ -259,6 +262,7 @@ function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelet
           fill
           sizes="(max-width: 768px) 100vw, 335px"
           className='object-cover'
+          priority={priority}
         />
 
         {/* 기억하심 뱃지 */}
