@@ -33,3 +33,14 @@ export async function getMyGroup(): Promise<GroupResponse> {
   const { data } = await apiClient.get<GroupResponse>('/groups/me');
   return data;
 }
+
+/** 어르신과의 관계 수정 */
+export async function updateRelation(relation: string): Promise<void> {
+  await apiClient.patch('/groups/me/relation', { relation });
+}
+
+/** 가족 초대 코드 조회 */
+export async function getInviteCode(): Promise<string> {
+  const { data } = await apiClient.get<{ invite_code: string }>('/groups/me/invite-code');
+  return data.invite_code;
+}

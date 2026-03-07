@@ -1,6 +1,6 @@
 export { apiClient } from './instance';
 export { checkHealth } from './healthApi';
-export { createGroup, joinGroup, getMyGroup } from './groupApi';
+export { createGroup, joinGroup, getMyGroup, updateRelation, getInviteCode } from './groupApi';
 export type { GroupResponse, GroupMemberResponse } from './groupApi';
 export { getUserMe } from './userApi';
 export { listMemories, getPresignedUrl, uploadToPresignedUrl, createMemory, getMemory, updateMemory, deleteMemory } from './memoryApi';
