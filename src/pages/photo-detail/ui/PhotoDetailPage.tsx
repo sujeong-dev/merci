@@ -192,10 +192,13 @@ export function PhotoDetailPage() {
         <div className='pb-4'>
           <div className='flex items-center justify-center relative h-[420px] w-full overflow-hidden rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
             {memory?.image_url && (
-              <img
+              <Image
                 src={memory.image_url}
                 alt={memory.title}
+                fill
                 className='object-cover'
+                sizes="(max-width: 768px) 100vw, 420px"
+                priority
               />
             )}
           </div>

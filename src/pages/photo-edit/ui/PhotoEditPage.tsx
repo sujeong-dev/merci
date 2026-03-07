@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { Button, Input, PageHeader, Select, ProgressBar, Spinner } from '@/shared/ui';
 import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon } from '@/shared/ui/icons';
 import { useMemoryEdit, formatDuration } from '@/features/memory-edit/model/useMemoryEdit';
@@ -101,7 +102,7 @@ function EditForm({ memory }: { memory: MemoryResponse }) {
             className="relative flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[10px] bg-white"
           >
             {imagePreviewUrl ? (
-              <img src={imagePreviewUrl} alt="사진 미리보기" className="h-full w-full object-cover" />
+              <Image src={imagePreviewUrl} alt="사진 미리보기" fill sizes="(max-width: 768px) 100vw, 420px" className="object-cover" />
             ) : (
               <div className="flex flex-col items-center">
                 <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">

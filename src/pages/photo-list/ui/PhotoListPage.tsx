@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Select } from '@/shared/ui';
 import { EditIcon, DeleteIcon, MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
@@ -252,10 +253,12 @@ function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelet
 
       {/* 이미지 영역 — Link로 감싸 상세페이지 이동 */}
       <Link href={ROUTES.photoDetail(memory.id)} className='block relative aspect-[335/233] w-full overflow-hidden'>
-        <img
+        <Image
           src={memory.image_url}
           alt={memory.title}
-          className='h-full w-full object-cover'
+          fill
+          sizes="(max-width: 768px) 100vw, 335px"
+          className='object-cover'
         />
 
         {/* 기억하심 뱃지 */}
