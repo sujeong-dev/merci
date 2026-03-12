@@ -12,7 +12,7 @@ interface LogoProps {
   size?: number;
 }
 
-function KakaoLogo({ size = 24 }: LogoProps) {
+export function KakaoLogo({ size = 24 }: LogoProps) {
   /* 피그마 스펙: 24×24 */
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -24,7 +24,7 @@ function KakaoLogo({ size = 24 }: LogoProps) {
   );
 }
 
-function NaverLogo({ size = 24 }: LogoProps) {
+export function NaverLogo({ size = 24 }: LogoProps) {
   /* 피그마 스펙: 18×18
    * N 경로 좌표가 (5.5~14.5) 범위이므로 viewBox를 타이트하게 조정해
    * 실제 N이 18px 영역을 충분히 채우도록 함 */

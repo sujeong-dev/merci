@@ -1,6 +1,6 @@
 import { apiClient } from './instance';
 
-type User = {
+export type UserResponse = {
   id: string;
   provider: string;
   email: string;
@@ -18,7 +18,7 @@ type Group = {
 }
 
 /** 사용자 정보 조회 */
-export async function getUserMe(): Promise<User> {
+export async function getUserMe(): Promise<UserResponse> {
   const { data } = await apiClient.get('/users/me');
   return data;
 }

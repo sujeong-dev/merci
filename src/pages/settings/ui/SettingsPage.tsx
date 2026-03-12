@@ -7,6 +7,8 @@ import { CheckIcon, CopyIcon } from '@/shared/ui/icons';
 import { getUserMe, updateRelation, getInviteCode } from '@/shared/api';
 import { useAuthStore } from '@/features/auth/model/authStore';
 import { ROUTES } from '@/shared/config/routes';
+import { UserResponse } from '@/shared/api/userApi';
+import { KakaoLogo, NaverLogo } from '@/shared/ui/SocialLoginButton';
 
 /**
  * 설정 페이지
@@ -48,7 +50,7 @@ export function SettingsPage() {
   const router = useRouter();
   const clearTokens = useAuthStore((s) => s.clearTokens);
 
-  const [userName, setUserName] = useState('');
+  const [userInfo, setUserInfo] = useState<UserResponse | null>(null);
   const [selectedRelation, setSelectedRelation] = useState<Relationship | null>(null);
   const [customRelation, setCustomRelation] = useState('');
   const [inviteCode, setInviteCode] = useState('');
@@ -60,7 +62,7 @@ export function SettingsPage() {
       try {
         const [user, code] = await Promise.all([getUserMe(), getInviteCode()]);
 
-        setUserName(user.name);
+        setUserInfo(user);
         setInviteCode(code);
 
         // relation 초기 선택: 미리 정의된 항목이면 해당 탭, 아니면 기타 + customRelation
@@ -154,8 +156,16 @@ export function SettingsPage() {
       {/* ── 유저 이름 ─────────────────────────────────────────────*/}
       <div className='px-5 py-6'>
         <h1 className='typography-h2 text-text-primary'>
-          {userName ? `${userName} 님` : ''}
+          {userInfo?.name ? `${userInfo.name} 님` : ''}
         </h1>
+        <div className='flex items-center gap-1 mt-1'>
+          {userInfo?.provider === 'kakao' ? (
+            <KakaoLogo size={16} />
+          ) : <NaverLogo size={16} />}
+          <span className='typography-body-sm text-text-subtle'>
+            {userInfo?.email}
+          </span>
+        </div>
       </div>
 
       {/* ── Main ──────────────────────────────────────────────────*/}
