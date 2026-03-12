@@ -14,6 +14,7 @@ export interface MemoryResponse {
   created_by: string;
   created_at: string;
   has_badge: boolean;
+  has_quiz: boolean;
 }
 
 export interface ListMemoriesParams {

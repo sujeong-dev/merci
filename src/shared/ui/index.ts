@@ -20,3 +20,5 @@ export type { CardButtonProps } from './CardButton';
 export { ModalSheet } from './ModalSheet';
 export { CommentInput } from './CommentInput';
 export { Spinner } from './Spinner';
+export { QuizOptionButton } from './QuizOptionButton';
+export type { QuizOptionButtonProps } from './QuizOptionButton';

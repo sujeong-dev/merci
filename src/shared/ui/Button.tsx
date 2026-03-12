@@ -20,6 +20,8 @@ const buttonVariants = cva(
           'bg-bg-surface text-text-subtle typography-caption-medium rounded-[10px] border border-border-default py-1.5 px-3',
         gray:
           'bg-bg-disabled text-text-subtle typography-caption-medium rounded-[10px] py-[7px] px-3',
+        green:
+          'bg-status-unfamiliar-bg text-status-unfamiliar typography-caption-medium rounded-[10px] py-1.5 px-3',
       },
       fullWidth: {
         true: 'w-full',

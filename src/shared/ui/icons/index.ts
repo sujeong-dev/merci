@@ -19,3 +19,4 @@ export { VagueIcon } from './VagueIcon';
 export { UnfamiliarIcon } from './UnfamiliarIcon';
 export { EditIcon } from './EditIcon';
 export { DeleteIcon } from './DeleteIcon';
+export { QuizCompleteIcon } from './QuizCompleteIcon';

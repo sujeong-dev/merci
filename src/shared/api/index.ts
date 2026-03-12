@@ -9,4 +9,6 @@ export { getRecalls, createRecall } from './recallApi';
 export type { RecallResponse, ReactionType } from './recallApi';
 export { getComments, createComment } from './commentApi';
 export type { CommentResponse } from './commentApi';
+export { generateQuiz, submitQuiz } from './quizApi';
+export type { QuizQuestionType, QuizDifficulty, QuizQuestion, QuizGenerateResponse, QuizSubmitRequest, QuizSubmitResponse } from './quizApi';
 

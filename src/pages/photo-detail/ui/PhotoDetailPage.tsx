@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Accordion, CommentInput, PageHeader, ProgressBar, Button } from '@/shared/ui';
-import { EditIcon, PlayIcon, PauseIcon, RememberIcon, UnfamiliarIcon, VagueIcon } from '@/shared/ui/icons';
+import { EditIcon, PlayIcon, PauseIcon, RememberIcon, UnfamiliarIcon, VagueIcon, QuizCompleteIcon } from '@/shared/ui/icons';
 import { cn } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/config/routes';
 import {
@@ -15,6 +15,7 @@ import {
   createComment,
 } from '@/shared/api';
 import type { MemoryResponse, CommentResponse, ReactionType } from '@/shared/api';
+import { QuizSection } from './QuizSection';
 
 /**
  * 사진 상세 — 기억의 기록
@@ -57,6 +58,7 @@ export function PhotoDetailPage() {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isQuizStarted, setIsQuizStarted] = useState(false);
 
   // ── 음성 플레이어 상태 ────────────────────────────────────────
   const [isPlaying, setIsPlaying] = useState(false);
@@ -230,6 +232,56 @@ export function PhotoDetailPage() {
               {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
             </span>
           </div>
+        )}
+
+        {/* 회상 퀴즈 */}
+        {memory && (
+          <Accordion title='회상 퀴즈' defaultOpen>
+            {isQuizStarted ? (
+              <QuizSection
+                memoryId={memoryId}
+                onComplete={() => {
+                  setIsQuizStarted(false);
+                  setMemory((prev) => (prev ? { ...prev, has_quiz: true } : null));
+                }}
+              />
+            ) : memory.has_quiz ? (
+              /* ── 퀴즈 완료 상태 ─────────────────────────────── */
+              <div className='flex flex-col items-center rounded-[10px] bg-white px-8 py-12 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
+                <QuizCompleteIcon size={64} />
+                <h3 className='typography-body-lg-bold text-text-primary-soft pt-6 pb-2 text-center'>
+                  이미 회상 퀴즈를 완료하셨어요.
+                </h3>
+                <p className='typography-body-sm text-text-subtle pb-8 text-center'>
+                  모든 퀴즈를 성공적으로 마쳤습니다.
+                </p>
+                <Button variant='primary' fullWidth onClick={() => setIsQuizStarted(true)}>
+                  다시 풀어보기
+                </Button>
+              </div>
+            ) : (
+              /* ── 퀴즈 미완료 상태 ───────────────────────────── */
+              <div className='flex flex-col items-center gap-6 rounded-md bg-white p-5'>
+                <Image
+                  src='/images/quiz-character.png'
+                  alt='퀴즈 캐릭터'
+                  width={96}
+                  height={96}
+                />
+                <div className='flex flex-col gap-2 text-center'>
+                  <h3 className='typography-body-lg-bold text-text-primary'>
+                    어르신과 함께 퀴즈를 풀어볼까요?
+                  </h3>
+                  <p className='typography-body-sm text-text-tertiary'>
+                    따뜻한 추억을 되새기며 즐거운 시간을 보내보세요.
+                  </p>
+                </div>
+                <Button variant='primary' fullWidth onClick={() => setIsQuizStarted(true)}>
+                  시작하기
+                </Button>
+              </div>
+            )}
+          </Accordion>
         )}
 
         {/* 추억 정보 Accordion */}
