@@ -9,8 +9,6 @@ import { cn } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/config/routes';
 import {
   getMemory,
-  getRecalls,
-  createRecall,
   getComments,
   createComment,
 } from '@/shared/api';
@@ -54,7 +52,6 @@ export function PhotoDetailPage() {
   const memoryId = params?.id as string;
   // ── 데이터 상태 ───────────────────────────────────────────────
   const [memory, setMemory] = useState<MemoryResponse | null>(null);
-  const [reaction, setReaction] = useState<ReactionType | null>(null);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -71,15 +68,10 @@ export function PhotoDetailPage() {
   useEffect(() => {
     Promise.all([
       getMemory(memoryId),
-      getRecalls(memoryId),
       getComments(memoryId),
-    ]).then(([mem, recalls, cmts]) => {
+    ]).then(([mem, cmts]) => {
       setMemory(mem);
       setComments(cmts);
-      // 본인 반응이 있으면 초기 selected
-      if (recalls.length > 0) {
-        setReaction(recalls[0].result); // 목록의 첫 번째 항목이 현재 상태(최신순)
-      }
     }).catch(() => {/* 에러 무시 */});
   }, [memoryId]);
 
@@ -130,16 +122,16 @@ export function PhotoDetailPage() {
     return `${m}:${s}`;
   }
 
-  // ── 어르신 반응 처리 ──────────────────────────────────────────
-  const handleReaction = useCallback(async (key: ReactionType) => {
-    // 낙관적 업데이트
-    setReaction(key);
-    try {
-      await createRecall(memoryId, key);
-    } catch {
-      // 실패 시 롤백하지 않음 (UX 우선)
-    }
-  }, [memoryId]);
+  // ── 어르신 반응 도출 ──────────────────────────────────────────
+  const getDerivedReaction = (): ReactionType | null => {
+    if (!memory || memory.quiz_score === null) return null;
+    if (memory.quiz_score >= 0 && memory.quiz_score <= 2) return '낯설어하심';
+    if (memory.quiz_score >= 3 && memory.quiz_score <= 6) return '가물가물';
+    if (memory.quiz_score >= 7 && memory.quiz_score <= 10) return '기억하심';
+    return null; // fallback
+  };
+
+  const currentReaction = getDerivedReaction();
 
   // ── 댓글 제출 ─────────────────────────────────────────────────
   const handleCommentSubmit = useCallback(async () => {
@@ -240,9 +232,9 @@ export function PhotoDetailPage() {
             {isQuizStarted ? (
               <QuizSection
                 memoryId={memoryId}
-                onComplete={() => {
+                onComplete={(totalScore) => {
                   setIsQuizStarted(false);
-                  setMemory((prev) => (prev ? { ...prev, has_quiz: true } : null));
+                  setMemory((prev) => (prev ? { ...prev, has_quiz: true, quiz_score: totalScore } : null));
                 }}
               />
             ) : memory.has_quiz ? (
@@ -250,7 +242,7 @@ export function PhotoDetailPage() {
               <div className='flex flex-col items-center rounded-[10px] bg-white px-8 py-12 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
                 <QuizCompleteIcon size={64} />
                 <h3 className='typography-body-lg-bold text-text-primary-soft pt-6 pb-2 text-center'>
-                  이미 회상 퀴즈를 완료하셨어요.
+                  회상 퀴즈를 완료하셨어요.
                 </h3>
                 <p className='typography-body-sm text-text-subtle pb-8 text-center'>
                   모든 퀴즈를 성공적으로 마쳤습니다.
@@ -304,15 +296,13 @@ export function PhotoDetailPage() {
 
           <div className='flex gap-3'>
             {REACTIONS.map(({ key, label, Icon, selectedCard, selectedText }) => {
-              const isSelected = reaction === key;
+              const isSelected = currentReaction === key;
               return (
-                <button
+                <div
                   key={key}
-                  type='button'
-                  onClick={() => handleReaction(key)}
                   className={cn(
-                    'flex flex-1 flex-col items-center rounded-[24px] border border-transparent bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
-                    isSelected && selectedCard,
+                    'flex flex-1 flex-col items-center rounded-[24px] border bg-white px-1 py-6 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] transition-all',
+                    isSelected ? selectedCard : 'border-transparent opacity-50 grayscale',
                   )}
                 >
                   <span className='pb-3'>
@@ -326,7 +316,7 @@ export function PhotoDetailPage() {
                   >
                     {label}
                   </span>
-                </button>
+                </div>
               );
             })}
           </div>

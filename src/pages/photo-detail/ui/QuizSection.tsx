@@ -3,7 +3,7 @@ import { useQuizPlay } from '@/features/quiz-play/model/useQuizPlay';
 
 interface QuizSectionProps {
   memoryId: string;
-  onComplete: () => void;
+  onComplete: (totalScore: number) => void;
 }
 
 export function QuizSection({ memoryId, onComplete }: QuizSectionProps) {
@@ -28,7 +28,7 @@ export function QuizSection({ memoryId, onComplete }: QuizSectionProps) {
     handlePrev,
   } = useQuizPlay({
     memoryId,
-    onComplete: () => onComplete(),
+    onComplete: (result) => onComplete(result.total_score),
   });
 
   if (isGenerating) {
