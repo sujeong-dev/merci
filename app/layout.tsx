@@ -17,6 +17,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "마씨(Merci)",
   description: "디지털 추억 앨범 서비스",
+  icons: {
+    icon: '/favicon.ico',
+    apple: [
+      { url: '/favicon-128.ico', sizes: '128x128', type: 'image/x-icon' },
+      { url: '/favicon-512.ico', sizes: '512x512', type: 'image/x-icon' },
+    ],
+  },
 };
 
 export default function RootLayout({
