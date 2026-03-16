@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { getPresignedUrl, uploadToPresignedUrl, updateMemory } from '@/shared/api';
-import type { MemoryResponse, MemoryImageResponse } from '@/shared/api';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { getPresignedUrl, uploadToPresignedUrl, updateMemory, listCategories } from '@/shared/api';
+import type { MemoryResponse, MemoryImageResponse, CategoryResponse } from '@/shared/api';
 
 export type RecordingState = 'idle' | 'recording' | 'done';
 
@@ -33,6 +33,14 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
   const [location, setLocation] = useState(memory.location);
   const [people, setPeople] = useState(memory.people);
   const [story, setStory] = useState(memory.story);
+  const [category, setCategory] = useState(memory.category ?? '');
+
+  // 카테고리 목록
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+
+  useEffect(() => {
+    listCategories().then(setCategories).catch(() => {});
+  }, []);
 
   // 이미지 — 기존 사진과 추가/삭제 관리
   const [existingImages, setExistingImages] = useState<MemoryImageResponse[]>(memory.images || []);
@@ -202,6 +210,7 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
         location,
         people,
         story,
+        category: category || undefined,
         ...(addImageKeys && addImageKeys.length > 0 ? { add_image_keys: addImageKeys } : {}),
         ...(removeImageIds.length > 0 ? { remove_image_ids: removeImageIds } : {}),
         ...(voiceKey !== undefined ? { voice_key: voiceKey } : {}),
@@ -213,7 +222,7 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [newImageFiles, voiceBlob, voiceState, title, year, location, people, story, memory.id, removeImageIds, onSuccess]);
+  }, [newImageFiles, voiceBlob, voiceState, title, year, location, people, story, category, memory.id, removeImageIds, onSuccess]);
 
   const isValid = totalImageCount > 0 && title.trim() !== '' && year !== '' && location.trim() !== '' && people.trim() !== '' && story.trim() !== '';
 
@@ -223,6 +232,8 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
     location, setLocation,
     people, setPeople,
     story, setStory,
+    category, setCategory,
+    categories,
     existingImages, removeImageIds, handleRemoveExistingImage,
     newImageFiles, newImagePreviewUrls, handleImageSelect, handleRemoveNewImage,
     totalImageCount,

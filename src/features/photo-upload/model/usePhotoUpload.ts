@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPresignedUrl, uploadToPresignedUrl, createMemory } from '@/shared/api';
+import { getPresignedUrl, uploadToPresignedUrl, createMemory, listCategories } from '@/shared/api';
+import type { CategoryResponse } from '@/shared/api';
 
 export type RecordingState = 'idle' | 'recording' | 'done';
 
@@ -31,6 +32,14 @@ export function usePhotoUpload() {
   const [location, setLocation] = useState('');
   const [people, setPeople] = useState('');
   const [story, setStory] = useState('');
+  const [category, setCategory] = useState('');
+
+  // 카테고리 목록
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+
+  useEffect(() => {
+    listCategories().then(setCategories).catch(() => {});
+  }, []);
 
   // 사진
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -206,6 +215,7 @@ export function usePhotoUpload() {
         people,
         story,
         ...(voiceKey ? { voice_key: voiceKey } : {}),
+        ...(category ? { category } : {}),
       });
 
       router.back();
@@ -214,7 +224,7 @@ export function usePhotoUpload() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [imageFiles, voiceBlob, title, year, location, people, story, router]);
+  }, [imageFiles, voiceBlob, title, year, location, people, story, category, router]);
 
   // 필수 필드 검증
   const isValid =
@@ -232,6 +242,8 @@ export function usePhotoUpload() {
     location, setLocation,
     people, setPeople,
     story, setStory,
+    category, setCategory,
+    categories,
     // 사진
     imageFiles,
     imagePreviewUrls,

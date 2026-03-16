@@ -25,3 +25,5 @@ export type { QuizOptionButtonProps } from './QuizOptionButton';
 export { YearSelectSheet } from './YearSelectSheet';
 export { AuthorSelectSheet } from './AuthorSelectSheet';
 export type { AuthorOption } from './AuthorSelectSheet';
+export { FilterButton } from './FilterButton';
+export { CategorySelectSheet } from './CategorySelectSheet';

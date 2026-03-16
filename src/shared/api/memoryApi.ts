@@ -22,12 +22,19 @@ export interface MemoryResponse {
   has_badge: boolean;
   has_quiz: boolean;
   quiz_score: number | null;
+  category: string;
 }
 
 export interface ListMemoriesParams {
   from_date?: string; // YYYY-MM-DD
   to_date?: string;   // YYYY-MM-DD
   created_by?: string; // user_id (uuid)
+  category?: string;
+}
+
+export interface CategoryResponse {
+  value: string;
+  label: string;
 }
 
 export interface PresignedUrlResponse {
@@ -43,6 +50,7 @@ export interface MemoryCreateRequest {
   people: string;
   story: string;
   voice_key?: string;
+  category?: string;
 }
 
 export interface MemoryUpdateRequest {
@@ -54,9 +62,10 @@ export interface MemoryUpdateRequest {
   people?: string;
   story?: string;
   voice_key?: string | null;
+  category?: string;
 }
 
-/** 추억 목록 조회 — 그룹 추억 리스트 (필터 옵션: 기간, 작성자) */
+/** 추억 목록 조회 — 그룹 추억 리스트 (필터 옵션: 기간, 작성자, 카테고리) */
 export async function listMemories(params?: ListMemoriesParams): Promise<MemoryResponse[]> {
   const { data } = await apiClient.get<MemoryResponse[]>('/memories', { params });
   return data;
@@ -113,4 +122,14 @@ export async function updateMemory(
 /** 추억 삭제 (DELETE 204) */
 export async function deleteMemory(memoryId: string): Promise<void> {
   await apiClient.delete(`/memories/${memoryId}`);
+}
+
+export interface MemoryCategoryListResponse {
+  categories: CategoryResponse[];
+}
+
+/** 카테고리 목록 조회 */
+export async function listCategories(): Promise<CategoryResponse[]> {
+  const { data } = await apiClient.get<MemoryCategoryListResponse>('/memories/categories');
+  return data.categories;
 }

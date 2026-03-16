@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Button, Input, PageHeader, ProgressBar, YearSelectSheet } from '@/shared/ui';
+import { Button, Input, PageHeader, ProgressBar, YearSelectSheet, FilterButton, CategorySelectSheet } from '@/shared/ui';
 import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon, CloseIcon } from '@/shared/ui/icons';
 import { usePhotoUpload, formatDuration } from '@/features/photo-upload/model/usePhotoUpload';
 
@@ -19,6 +19,7 @@ const MAX_RECORDING_SECONDS = 300;
 export function PhotoUploadPage() {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [isYearOpen, setIsYearOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const {
     title, setTitle,
@@ -26,6 +27,8 @@ export function PhotoUploadPage() {
     location, setLocation,
     people, setPeople,
     story, setStory,
+    category, setCategory,
+    categories,
     imageFiles,
     imagePreviewUrls,
     handleImageSelect,
@@ -135,6 +138,21 @@ export function PhotoUploadPage() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+
+        {/* 사진 카테고리 */}
+        <div className="flex flex-col gap-3">
+          <span className="typography-body-sm-bold pl-1 text-text-subtle">사진 카테고리</span>
+           <button
+            type="button"
+            onClick={() => setIsCategoryOpen(true)}
+            className="flex w-full items-center justify-between rounded-xl border border-border-default bg-white px-4 py-3 text-left transition-colors hover:bg-[#F9FAFB] active:bg-[#F3F4F6]"
+          >
+            <span className="typography-body-lg text-text-primary">
+              {category ? `${category}` : '카테고리를 선택하세요'}
+            </span>
+            <ChevronDownIcon size={20} className="text-text-tertiary" />
+          </button>
+        </div>
 
         {/* 사진 연도 */}
         <div className="flex flex-col gap-3">
@@ -312,6 +330,15 @@ export function PhotoUploadPage() {
         selectedYear={year}
         onSelect={setYear}
         showAllTime={false}
+      />
+
+      <CategorySelectSheet
+        isOpen={isCategoryOpen}
+        onClose={() => setIsCategoryOpen(false)}
+        categories={categories}
+        selectedCategoryId={category}
+        onSelect={setCategory}
+        showAll={false}
       />
     </div>
   );

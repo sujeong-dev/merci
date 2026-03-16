@@ -3,11 +3,11 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Select, YearSelectSheet, AuthorSelectSheet } from '@/shared/ui';
+import { Select, YearSelectSheet, AuthorSelectSheet, FilterButton, CategorySelectSheet } from '@/shared/ui';
 import { EditIcon, DeleteIcon, MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon, CopyIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
-import { getMyGroup, listMemories } from '@/shared/api';
-import type { GroupMemberResponse, MemoryResponse } from '@/shared/api';
+import { getMyGroup, listMemories, listCategories } from '@/shared/api';
+import type { GroupMemberResponse, MemoryResponse, CategoryResponse } from '@/shared/api';
 import { RecordingIcon } from '@/shared/ui/icons/Recording';
 import { useRouter } from 'next/navigation';
 import { DeleteConfirmModal } from '@/features/memory-delete/ui/DeleteConfirmModal';
@@ -42,8 +42,12 @@ export function PhotoListPage() {
   // 필터 state
   const [year, setYear] = useState('');
   const [authorId, setAuthorId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  
   const [isYearOpen, setIsYearOpen] = useState(false);
   const [isAuthorOpen, setIsAuthorOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   // 삭제 모달 state
   const [deleteTarget, setDeleteTarget] = useState<MemoryResponse | null>(null);
@@ -51,10 +55,11 @@ export function PhotoListPage() {
 
   // ── 그룹 정보 로드 (마운트 시 1회) ──────────────────────────
   useEffect(() => {
-    getMyGroup()
-      .then((group) => {
+    Promise.all([getMyGroup(), listCategories()])
+      .then(([group, cats]) => {
         setGroupName(group.name);
         setMembers(group.members);
+        setCategories(cats);
       })
       .catch(() => {
         // 에러 시 빈 상태 유지
@@ -67,8 +72,9 @@ export function PhotoListPage() {
     try {
       const data = await listMemories({
         from_date: year || undefined,
-        to_date: year|| undefined,
+        to_date: year || undefined,
         created_by: authorId || undefined,
+        category: categoryId || undefined,
       });
       setMemories(data);
     } catch {
@@ -76,7 +82,7 @@ export function PhotoListPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [year, authorId]);
+  }, [year, authorId, categoryId]);
 
   useEffect(() => {
     fetchMemories();
@@ -117,27 +123,25 @@ export function PhotoListPage() {
           </h1>
 
           {/* 필터 pills */}
-          <div className='flex items-center gap-2'>
-            <button
-              type="button"
+          <div className='flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1'>
+            <FilterButton
+              label={year ? YEAR_OPTIONS.find(o => o.value === year)?.label || year : '전체 기간'}
               onClick={() => setIsYearOpen(true)}
-              className="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 typography-body-lg text-text-primary"
-            >
-              <span>{year ? YEAR_OPTIONS.find(o => o.value === year)?.label : '전체 기간'}</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <button
-              type="button"
+              isSelected={!!year}
+              className="shrink-0"
+            />
+            <FilterButton
+              label={authorId ? authorOptions.find(o => o.value === authorId)?.label || '작성자' : '전체 작성자'}
               onClick={() => setIsAuthorOpen(true)}
-              className="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 typography-body-lg text-text-primary"
-            >
-              <span>{authorId ? authorOptions.find(o => o.value === authorId)?.label : '전체 작성자'}</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+              isSelected={!!authorId}
+              className="shrink-0"
+            />
+            <FilterButton
+              label={categoryId ? categories.find(c => c.value === categoryId)?.label || '카테고리' : '전체 카테고리'}
+              onClick={() => setIsCategoryOpen(true)}
+              isSelected={!!categoryId}
+              className="shrink-0"
+            />
           </div>
         </div>
 
@@ -214,6 +218,14 @@ export function PhotoListPage() {
         options={authorOptions}
         selectedAuthor={authorId}
         onSelect={setAuthorId}
+      />
+
+      <CategorySelectSheet
+        isOpen={isCategoryOpen}
+        onClose={() => setIsCategoryOpen(false)}
+        categories={categories}
+        selectedCategoryId={categoryId}
+        onSelect={setCategoryId}
       />
     </div>
   );

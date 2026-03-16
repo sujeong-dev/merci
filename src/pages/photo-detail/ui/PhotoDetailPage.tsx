@@ -11,8 +11,9 @@ import {
   getMemory,
   getComments,
   createComment,
+  listCategories,
 } from '@/shared/api';
-import type { MemoryResponse, CommentResponse, ReactionType } from '@/shared/api';
+import type { MemoryResponse, CommentResponse, ReactionType, CategoryResponse } from '@/shared/api';
 import { QuizSection } from './QuizSection';
 
 /**
@@ -80,8 +81,16 @@ export function PhotoDetailPage() {
     if (!memory?.voice_url) return;
 
     const audio = new Audio(memory.voice_url);
+    audio.preload = 'metadata';
 
-    audio.onloadedmetadata = () => setAudioDuration(audio.duration);
+    const updateDuration = () => {
+      if (isFinite(audio.duration) && audio.duration > 0) {
+        setAudioDuration(audio.duration);
+      }
+    };
+    audio.onloadedmetadata = updateDuration;
+    audio.ondurationchange = updateDuration;
+
     audio.ontimeupdate = () => {
       setAudioCurrentTime(audio.currentTime);
       setAudioProgress(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0);
@@ -155,6 +164,7 @@ export function PhotoDetailPage() {
   // ── 추억 정보 rows ────────────────────────────────────────────
   const infoRows = memory
     ? [
+        { label: '사진 카테고리', value: `${memory.category}` },
         { label: '사진 연도', value: `${memory.year}년` },
         { label: '사진 장소', value: memory.location },
         { label: '함께한 인물', value: memory.people },
@@ -188,7 +198,7 @@ export function PhotoDetailPage() {
             {memory?.images?.map((image, i) => (
               <div
                 key={image.id}
-                className='flex-shrink-0 relative h-[420px] w-full snap-center overflow-hidden rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] block'
+                className='shrink-0 relative h-[420px] w-full snap-center overflow-hidden rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] block'
               >
                 <Image
                   src={image.image_url}
