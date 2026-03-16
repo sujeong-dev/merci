@@ -22,7 +22,10 @@ export interface MemoryResponse {
   has_badge: boolean;
   has_quiz: boolean;
   quiz_score: number | null;
-  category: string;
+  category: {
+    value: string;
+    label: string;
+  };
 }
 
 export interface ListMemoriesParams {

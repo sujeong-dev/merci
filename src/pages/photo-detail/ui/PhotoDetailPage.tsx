@@ -80,16 +80,37 @@ export function PhotoDetailPage() {
   useEffect(() => {
     if (!memory?.voice_url) return;
 
-    const audio = new Audio(memory.voice_url);
-    audio.preload = 'metadata';
+    // src 설정 전에 preload를 지정해야 브라우저가 올바른 전략으로 로딩을 시작함
+    const audio = new Audio();
+    audio.preload = 'auto';
 
-    const updateDuration = () => {
+    // MediaRecorder로 녹음된 WebM/Ogg는 헤더에 duration이 없어 Infinity로 반환됨.
+    // 파일 끝으로 seek하면 브라우저가 실제 끝 위치로 snap하면서 duration이 확정됨.
+    let measuringDuration = false;
+
+    audio.onloadedmetadata = () => {
+      if (isFinite(audio.duration) && audio.duration > 0) {
+        setAudioDuration(audio.duration);
+      } else {
+        measuringDuration = true;
+        audio.currentTime = 1e10; // duration 측정용 seek
+      }
+    };
+
+    audio.onseeked = () => {
+      if (!measuringDuration) return;
+      measuringDuration = false;
+      if (isFinite(audio.duration) && audio.duration > 0) {
+        setAudioDuration(audio.duration);
+      }
+      audio.currentTime = 0; // 처음으로 복귀 (이 seek은 플래그 false라 무시됨)
+    };
+
+    audio.ondurationchange = () => {
       if (isFinite(audio.duration) && audio.duration > 0) {
         setAudioDuration(audio.duration);
       }
     };
-    audio.onloadedmetadata = updateDuration;
-    audio.ondurationchange = updateDuration;
 
     audio.ontimeupdate = () => {
       setAudioCurrentTime(audio.currentTime);
@@ -98,6 +119,8 @@ export function PhotoDetailPage() {
     audio.onended = () => setIsPlaying(false);
 
     audioRef.current = audio;
+    audio.src = memory.voice_url;
+    audio.load(); // preload='auto' 설정 후 명시적으로 로딩 트리거
 
     return () => {
       audio.pause();
@@ -164,7 +187,7 @@ export function PhotoDetailPage() {
   // ── 추억 정보 rows ────────────────────────────────────────────
   const infoRows = memory
     ? [
-        { label: '사진 카테고리', value: `${memory.category}` },
+        { label: '사진 카테고리', value: `${memory.category.label}` },
         { label: '사진 연도', value: `${memory.year}년` },
         { label: '사진 장소', value: memory.location },
         { label: '함께한 인물', value: memory.people },
