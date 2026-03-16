@@ -33,7 +33,7 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
   const [location, setLocation] = useState(memory.location);
   const [people, setPeople] = useState(memory.people);
   const [story, setStory] = useState(memory.story);
-  const [category, setCategory] = useState(memory.category ?? '');
+  const [category, setCategory] = useState(memory.category?.value ?? '');
 
   // 카테고리 목록
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
