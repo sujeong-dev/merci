@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { getPresignedUrl, uploadToPresignedUrl, updateMemory } from '@/shared/api';
-import type { MemoryResponse } from '@/shared/api';
+import type { MemoryResponse, MemoryImageResponse } from '@/shared/api';
 
 export type RecordingState = 'idle' | 'recording' | 'done';
 
@@ -34,9 +34,12 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
   const [people, setPeople] = useState(memory.people);
   const [story, setStory] = useState(memory.story);
 
-  // 이미지 — 변경 시만 업로드 (null이면 기존 유지)
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(memory.image_url);
+  // 이미지 — 기존 사진과 추가/삭제 관리
+  const [existingImages, setExistingImages] = useState<MemoryImageResponse[]>(memory.images || []);
+  const [removeImageIds, setRemoveImageIds] = useState<string[]>([]);
+
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [newImagePreviewUrls, setNewImagePreviewUrls] = useState<string[]>([]);
 
   // 음성 — null이면 기존 유지, 'delete'면 삭제
   type VoiceState = 'keep' | 'record' | 'delete';
@@ -60,10 +63,34 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
   const startTimeRef = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // ── 이미지 합계 개수 확인용 (최대 10개 제한) ───────────────
+  const totalImageCount = existingImages.length + newImageFiles.length;
+
   // ── 이미지 선택 ─────────────────────────────────────────────
-  const handleImageSelect = useCallback((file: File) => {
-    setImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
+  const handleImageSelect = useCallback((files: FileList | File[]) => {
+    const arr = Array.from(files);
+    
+    setNewImageFiles((prev) => {
+      const combined = [...prev, ...arr];
+      return combined.slice(0, 10 - existingImages.length);
+    });
+    setNewImagePreviewUrls((prev) => {
+      const newUrls = arr.map((f) => URL.createObjectURL(f));
+      const combined = [...prev, ...newUrls];
+      return combined.slice(0, 10 - existingImages.length);
+    });
+  }, [existingImages.length]);
+
+  // ── 기존 이미지 삭제 ────────────────────────────────────────
+  const handleRemoveExistingImage = useCallback((id: string) => {
+    setExistingImages((prev) => prev.filter((img) => img.id !== id));
+    setRemoveImageIds((prev) => [...prev, id]);
+  }, []);
+
+  // ── 신규 추가 이미지 삭제 ──────────────────────────────────
+  const handleRemoveNewImage = useCallback((index: number) => {
+    setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewImagePreviewUrls((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   // ── 기존 음성 삭제 ────────────────────────────────────────
@@ -147,12 +174,15 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
     setSubmitError('');
 
     try {
-      // 이미지 업로드 (변경 시만)
-      let imageKey: string | undefined;
-      if (imageFile) {
-        const presigned = await getPresignedUrl('image', imageFile.type);
-        await uploadToPresignedUrl(presigned.upload_url, imageFile, imageFile.type);
-        imageKey = presigned.object_key;
+      // 새 이미지 업로드 (추가 시만)
+      let addImageKeys: string[] | undefined;
+      if (newImageFiles.length > 0) {
+        const uploadPromises = newImageFiles.map(async (file) => {
+          const presigned = await getPresignedUrl('image', file.type);
+          await uploadToPresignedUrl(presigned.upload_url, file, file.type);
+          return presigned.object_key;
+        });
+        addImageKeys = await Promise.all(uploadPromises);
       }
 
       // 음성 처리
@@ -172,7 +202,8 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
         location,
         people,
         story,
-        ...(imageKey ? { image_key: imageKey } : {}),
+        ...(addImageKeys && addImageKeys.length > 0 ? { add_image_keys: addImageKeys } : {}),
+        ...(removeImageIds.length > 0 ? { remove_image_ids: removeImageIds } : {}),
         ...(voiceKey !== undefined ? { voice_key: voiceKey } : {}),
       });
 
@@ -182,9 +213,9 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [imageFile, voiceBlob, voiceState, title, year, location, people, story, memory.id, onSuccess]);
+  }, [newImageFiles, voiceBlob, voiceState, title, year, location, people, story, memory.id, removeImageIds, onSuccess]);
 
-  const isValid = title.trim() !== '' && year !== '' && location.trim() !== '' && people.trim() !== '' && story.trim() !== '';
+  const isValid = totalImageCount > 0 && title.trim() !== '' && year !== '' && location.trim() !== '' && people.trim() !== '' && story.trim() !== '';
 
   return {
     title, setTitle,
@@ -192,7 +223,9 @@ export function useMemoryEdit({ memory, onSuccess }: UseMemoryEditOptions) {
     location, setLocation,
     people, setPeople,
     story, setStory,
-    imageFile, imagePreviewUrl, handleImageSelect,
+    existingImages, removeImageIds, handleRemoveExistingImage,
+    newImageFiles, newImagePreviewUrls, handleImageSelect, handleRemoveNewImage,
+    totalImageCount,
     voiceState, recordingState, voiceBlob, voiceDuration, recordingSeconds,
     isPlaying, handleStartRecording, handleStopRecording,
     handleTogglePlayVoice, handleDeleteVoice, handleDeleteExistingVoice,

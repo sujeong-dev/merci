@@ -1,11 +1,17 @@
 import axios from 'axios';
 import { apiClient } from './instance';
 
+export interface MemoryImageResponse {
+  id: string;
+  image_url: string;
+  sort_order: number;
+}
+
 export interface MemoryResponse {
   id: string;
   group_id: string;
   title: string;
-  image_url: string;
+  images: MemoryImageResponse[];
   year: number;
   location: string;
   people: string;
@@ -31,7 +37,7 @@ export interface PresignedUrlResponse {
 
 export interface MemoryCreateRequest {
   title: string;
-  image_key: string;
+  image_keys: string[];
   year: number;
   location: string;
   people: string;
@@ -41,7 +47,8 @@ export interface MemoryCreateRequest {
 
 export interface MemoryUpdateRequest {
   title?: string;
-  image_key?: string;
+  add_image_keys?: string[];
+  remove_image_ids?: string[];
   year?: number;
   location?: string;
   people?: string;

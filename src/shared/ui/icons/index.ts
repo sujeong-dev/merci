@@ -21,3 +21,4 @@ export { EditIcon } from './EditIcon';
 export { DeleteIcon } from './DeleteIcon';
 export { QuizCompleteIcon } from './QuizCompleteIcon';
 export { SpeakerIcon } from './SpeakerIcon';
+export { CloseIcon } from './CloseIcon';

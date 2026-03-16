@@ -4,7 +4,7 @@ export { createGroup, joinGroup, getMyGroup, updateRelation, getInviteCode } fro
 export type { GroupResponse, GroupMemberResponse } from './groupApi';
 export { getUserMe } from './userApi';
 export { listMemories, getPresignedUrl, uploadToPresignedUrl, createMemory, getMemory, updateMemory, deleteMemory } from './memoryApi';
-export type { MemoryResponse, ListMemoriesParams, MemoryCreateRequest, MemoryUpdateRequest, PresignedUrlResponse } from './memoryApi';
+export type { MemoryResponse, MemoryImageResponse, ListMemoriesParams, MemoryCreateRequest, MemoryUpdateRequest, PresignedUrlResponse } from './memoryApi';
 export { getRecalls, createRecall } from './recallApi';
 export type { RecallResponse, ReactionType } from './recallApi';
 export { getComments, createComment } from './commentApi';

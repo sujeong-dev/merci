@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Select, YearSelectSheet, AuthorSelectSheet } from '@/shared/ui';
-import { EditIcon, DeleteIcon, MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
+import { EditIcon, DeleteIcon, MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon, CopyIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
 import { getMyGroup, listMemories } from '@/shared/api';
 import type { GroupMemberResponse, MemoryResponse } from '@/shared/api';
@@ -286,7 +286,7 @@ function MemoryCard({ memory, members, isMenuOpen, onMenuToggle, onEdit, onDelet
       {/* 이미지 영역 — Link로 감싸 상세페이지 이동 */}
       <Link href={ROUTES.photoDetail(memory.id)} className='block relative aspect-[335/233] w-full overflow-hidden'>
         <Image
-          src={memory.image_url}
+          src={memory.images?.[0]?.image_url || '/images/quiz-character.png'}
           alt={memory.title}
           fill
           sizes="(max-width: 768px) 100vw, 335px"

@@ -33,8 +33,8 @@ export function usePhotoUpload() {
   const [story, setStory] = useState('');
 
   // 사진
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 
   // 음성 녹음
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
@@ -55,9 +55,32 @@ export function usePhotoUpload() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // ── 사진 선택 ─────────────────────────────────────────────────
-  const handleImageSelect = useCallback((file: File) => {
-    setImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
+  const handleImageSelect = useCallback((files: FileList | File[]) => {
+    const newFiles = Array.from(files);
+    
+    // 이전 로직: 단일 파일
+    // setImageFile(file);
+    // setImagePreviewUrl(URL.createObjectURL(file));
+
+    // 새 로직: 다중 파일 (최대 10개)
+    setImageFiles((prev) => {
+      const combined = [...prev, ...newFiles];
+      return combined.slice(0, 10);
+    });
+    setImagePreviewUrls((prev) => {
+      const newUrls = newFiles.map((f) => URL.createObjectURL(f));
+      const combined = [...prev, ...newUrls];
+      return combined.slice(0, 10);
+    });
+  }, []);
+
+  const handleRemoveImage = useCallback((index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      // URL.revokeObjectURL 은 메모리 해제를 위해 필요하지만 여기선 생략할 수도 있음
+      return updated;
+    });
   }, []);
 
   // ── 녹음 시작 ─────────────────────────────────────────────────
@@ -152,15 +175,18 @@ export function usePhotoUpload() {
 
   // ── 제출 ──────────────────────────────────────────────────────
   const handleSubmit = useCallback(async () => {
-    if (!imageFile) return;
+    if (imageFiles.length === 0) return;
     setIsSubmitting(true);
     setSubmitError('');
 
     try {
-      // 1. 이미지 업로드
-      const imagePresigned = await getPresignedUrl('image', imageFile.type);
-      await uploadToPresignedUrl(imagePresigned.upload_url, imageFile, imageFile.type);
-      const imageKey = imagePresigned.object_key;
+      // 1. 모든 이미지 동시 업로드 후 keys 수집
+      const imageUploadPromises = imageFiles.map(async (file) => {
+        const presigned = await getPresignedUrl('image', file.type);
+        await uploadToPresignedUrl(presigned.upload_url, file, file.type);
+        return presigned.object_key;
+      });
+      const imageKeys = await Promise.all(imageUploadPromises);
 
       // 2. 음성 업로드 (있을 때만)
       let voiceKey: string | undefined;
@@ -174,7 +200,7 @@ export function usePhotoUpload() {
       // 3. 추억 등록
       await createMemory({
         title,
-        image_key: imageKey,
+        image_keys: imageKeys,
         year: Number(year),
         location,
         people,
@@ -188,11 +214,11 @@ export function usePhotoUpload() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [imageFile, voiceBlob, title, year, location, people, story, router]);
+  }, [imageFiles, voiceBlob, title, year, location, people, story, router]);
 
   // 필수 필드 검증
   const isValid =
-    !!imageFile &&
+    imageFiles.length > 0 &&
     title.trim() !== '' &&
     year !== '' &&
     location.trim() !== '' &&
@@ -207,9 +233,10 @@ export function usePhotoUpload() {
     people, setPeople,
     story, setStory,
     // 사진
-    imageFile,
-    imagePreviewUrl,
+    imageFiles,
+    imagePreviewUrls,
     handleImageSelect,
+    handleRemoveImage,
     // 녹음
     recordingState,
     voiceBlob,

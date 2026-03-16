@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Button, Input, PageHeader, ProgressBar, Spinner, YearSelectSheet } from '@/shared/ui';
-import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon } from '@/shared/ui/icons';
+import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon, CloseIcon } from '@/shared/ui/icons';
 import { useMemoryEdit, formatDuration } from '@/features/memory-edit/model/useMemoryEdit';
 import { getMemory } from '@/shared/api';
 import type { MemoryResponse } from '@/shared/api';
@@ -62,7 +62,9 @@ function EditForm({ memory }: { memory: MemoryResponse }) {
     location, setLocation,
     people, setPeople,
     story, setStory,
-    imageFile, imagePreviewUrl, handleImageSelect,
+    existingImages, handleRemoveExistingImage,
+    newImageFiles, newImagePreviewUrls, handleImageSelect, handleRemoveNewImage,
+    totalImageCount,
     voiceState, recordingState, voiceBlob, voiceDuration, recordingSeconds,
     isPlaying, handleStartRecording, handleStopRecording,
     handleTogglePlayVoice, handleDeleteVoice, handleDeleteExistingVoice,
@@ -77,8 +79,8 @@ function EditForm({ memory }: { memory: MemoryResponse }) {
   });
 
   function onImageInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) handleImageSelect(file);
+    const files = e.target.files;
+    if (files && files.length > 0) handleImageSelect(files);
     e.target.value = '';
   }
 
@@ -89,30 +91,86 @@ function EditForm({ memory }: { memory: MemoryResponse }) {
       <main className="flex flex-col gap-10 px-5 pt-6 pb-32">
         {/* 사진 선택 */}
         <div className="flex flex-col gap-3">
-          <span className="typography-body-sm-bold pl-1 text-text-subtle">사진 선택</span>
+          <div className="flex items-center justify-between pl-1">
+            <span className="typography-body-sm-bold text-text-subtle">
+              사진 선택 ({totalImageCount}/10)
+            </span>
+          </div>
+
           <input
             ref={imageInputRef}
             type="file"
+            multiple
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={onImageInputChange}
           />
-          <button
-            type="button"
-            onClick={() => imageInputRef.current?.click()}
-            className="relative flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[10px] bg-white"
-          >
-            {imagePreviewUrl ? (
-              <Image src={imagePreviewUrl} alt="사진 미리보기" fill sizes="(max-width: 768px) 100vw, 420px" className="object-cover" />
-            ) : (
-              <div className="flex flex-col items-center">
-                <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">
-                  <AddPictureIcon size={24} className="text-text-tertiary" />
-                </div>
-                <p className="mt-4 typography-body-lg text-text-primary">사진을 추가해주세요</p>
+
+          {/* 가로 스크롤 미리보기 캐러셀 */}
+          <div className="-mx-5 flex snap-x snap-mandatory overflow-x-auto px-5 gap-4 pb-2 scrollbar-hide">
+            {/* 1. 기존 이미지들 */}
+            {existingImages.map((img, i) => (
+              <div key={img.id} className="relative flex h-[420px] w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-[10px] bg-white border border-[#E5E7EB]">
+                <Image src={img.image_url} alt={`기존 사진 ${i + 1}`} fill className="object-cover" />
+                {i === 0 && (
+                  <div className="absolute top-4 left-4 rounded-md bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm shadow-sm">
+                    대표 사진
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExistingImage(img.id)}
+                  className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 shadow-sm"
+                >
+                  <CloseIcon size={18} />
+                </button>
+              </div>
+            ))}
+
+            {/* 2. 새로 추가한 이미지들 */}
+            {newImagePreviewUrls.map((url, i) => (
+              <div key={url} className="relative flex h-[420px] w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-[10px] bg-white border border-[#E5E7EB]">
+                <Image src={url} alt={`새 사진 ${i + 1}`} fill className="object-cover" />
+                {existingImages.length === 0 && i === 0 && (
+                  <div className="absolute top-4 left-4 rounded-md bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm shadow-sm">
+                    대표 사진
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveNewImage(i)}
+                  className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 shadow-sm"
+                >
+                  <CloseIcon size={18} />
+                </button>
+              </div>
+            ))}
+
+            {/* 3. 사진 추가 버튼 (최대 10개 미만일 때만) */}
+            {totalImageCount < 10 && (
+              <div className="relative flex h-[420px] w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-[10px] bg-white border border-dashed border-[#E5E7EB] shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex h-full w-full flex-col items-center justify-center"
+                >
+                  <div className="flex flex-col items-center">
+                    <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">
+                      <AddPictureIcon size={24} className="text-text-tertiary" />
+                    </div>
+                    <div className="pt-4 flex flex-col items-center gap-1">
+                      <p className="typography-body-lg text-text-primary">
+                        {totalImageCount === 0 ? "사진을 추가해주세요" : "사진 추가하기"}
+                      </p>
+                      <p className="typography-body-sm text-text-tertiary">
+                        {totalImageCount === 0 ? "소중한 순간의 한 장면" : "추가 사진 등록"}
+                      </p>
+                    </div>
+                  </div>
+                </button>
               </div>
             )}
-          </button>
+          </div>
         </div>
 
         <Input id="edit-title" label="사진 제목" placeholder="예: 봄나들이" value={title} onChange={(e) => setTitle(e.target.value)} />

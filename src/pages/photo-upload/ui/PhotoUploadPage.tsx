@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { Button, Input, PageHeader, ProgressBar, YearSelectSheet } from '@/shared/ui';
-import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon } from '@/shared/ui/icons';
+import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon, CloseIcon } from '@/shared/ui/icons';
 import { usePhotoUpload, formatDuration } from '@/features/photo-upload/model/usePhotoUpload';
 
 // 연도 옵션 (현재 연도 ~ 1900, 기본값은 현재 연도)
@@ -26,9 +26,10 @@ export function PhotoUploadPage() {
     location, setLocation,
     people, setPeople,
     story, setStory,
-    imageFile,
-    imagePreviewUrl,
+    imageFiles,
+    imagePreviewUrls,
     handleImageSelect,
+    handleRemoveImage,
     recordingState,
     voiceDuration,
     recordingSeconds,
@@ -45,8 +46,8 @@ export function PhotoUploadPage() {
 
 
   function onImageInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) handleImageSelect(file);
+    const files = e.target.files;
+    if (files && files.length > 0) handleImageSelect(files);
     // 같은 파일 재선택 허용을 위해 value 초기화
     e.target.value = '';
   }
@@ -62,43 +63,68 @@ export function PhotoUploadPage() {
 
         {/* 사진 선택 */}
         <div className="flex flex-col gap-3">
-          <span className="typography-body-sm-bold pl-1 text-text-subtle">사진 선택</span>
+          <div className="flex items-center justify-between pl-1">
+            <span className="typography-body-sm-bold text-text-subtle">
+              사진 선택 ({imageFiles.length}/10)
+            </span>
+          </div>
 
           {/* 숨겨진 파일 입력 */}
           <input
             ref={imageInputRef}
             type="file"
+            multiple
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={onImageInputChange}
           />
 
-          <button
-            type="button"
-            onClick={() => imageInputRef.current?.click()}
-            className="relative flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[10px] bg-white"
-          >
-            {imageFile ? (
-              /* 미리보기 */
-              <Image
-                src={imagePreviewUrl}
-                alt="선택한 사진 미리보기"
-                fill
-                className="object-cover"
-              />
-            ) : (
-              /* 빈 상태 */
-              <div className="flex flex-col items-center">
-                <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">
-                  <AddPictureIcon size={24} className="text-text-tertiary" />
-                </div>
-                <div className="pt-4 flex flex-col items-center gap-1">
-                  <p className="typography-body-lg text-text-primary">사진을 추가해주세요</p>
-                  <p className="typography-body-sm text-text-tertiary">소중한 순간의 한 장면</p>
-                </div>
+          {/* 가로 스크롤 미리보기 캐러셀 */}
+          <div className="-mx-5 flex snap-x snap-mandatory overflow-x-auto px-5 gap-4 pb-2 scrollbar-hide">
+            {/* 추가된 썸네일들 */}
+            {imagePreviewUrls.map((url, i) => (
+              <div key={url} className="relative flex h-[420px] w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-[10px] bg-white border border-[#E5E7EB]">
+                <Image src={url} alt={`미리보기 ${i + 1}`} fill className="object-cover" />
+                {i === 0 && (
+                  <div className="absolute top-4 left-4 rounded-md bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                    대표 사진
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(i)}
+                  className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+                >
+                  <CloseIcon size={18} />
+                </button>
+              </div>
+            ))}
+
+            {/* 사진 추가 버튼 (최대 10개 미만일 때만) */}
+            {imageFiles.length < 10 && (
+              <div className="relative flex h-[420px] w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-[10px] bg-white border border-dashed border-[#E5E7EB]">
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex h-full w-full flex-col items-center justify-center"
+                >
+                  <div className="flex flex-col items-center">
+                    <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">
+                      <AddPictureIcon size={24} className="text-text-tertiary" />
+                    </div>
+                    <div className="pt-4 flex flex-col items-center gap-1">
+                      <p className="typography-body-lg text-text-primary">
+                        {imageFiles.length === 0 ? "사진을 추가해주세요" : "사진 추가하기"}
+                      </p>
+                      <p className="typography-body-sm text-text-tertiary">
+                        {imageFiles.length === 0 ? "소중한 순간의 한 장면" : "추가 사진 등록"}
+                      </p>
+                    </div>
+                  </div>
+                </button>
               </div>
             )}
-          </button>
+          </div>
         </div>
 
         {/* 사진 제목 */}

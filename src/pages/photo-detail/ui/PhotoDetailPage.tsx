@@ -184,17 +184,27 @@ export function PhotoDetailPage() {
 
         {/* 사진 */}
         <div className='pb-4'>
-          <div className='flex items-center justify-center relative h-[420px] w-full overflow-hidden rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]'>
-            {memory?.image_url && (
-              <Image
-                src={memory.image_url}
-                alt={memory.title}
-                fill
-                className='object-cover'
-                sizes="(max-width: 768px) 100vw, 420px"
-                priority
-              />
-            )}
+          <div className='flex snap-x snap-mandatory overflow-x-auto scrollbar-hide w-full gap-4'>
+            {memory?.images?.map((image, i) => (
+              <div
+                key={image.id}
+                className='flex-shrink-0 relative h-[420px] w-full snap-center overflow-hidden rounded-[10px] bg-[#F3F4F6] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)] block'
+              >
+                <Image
+                  src={image.image_url}
+                  alt={`${memory.title} 사진 ${i + 1}`}
+                  fill
+                  className='object-cover'
+                  sizes="(max-width: 768px) 100vw, 420px"
+                  priority={i === 0}
+                />
+                {memory.images.length > 1 && (
+                  <div className="absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1 font-semibold text-white text-xs backdrop-blur-sm">
+                    {i + 1} / {memory.images.length}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
