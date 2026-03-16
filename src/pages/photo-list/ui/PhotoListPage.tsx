@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Select } from '@/shared/ui';
+import { Select, YearSelectSheet, AuthorSelectSheet } from '@/shared/ui';
 import { EditIcon, DeleteIcon, MoreIcon, PlusIcon, RememberIcon, SettingsIcon, WarningIcon } from '@/shared/ui/icons';
 import { ROUTES } from '@/shared/config/routes';
 import { getMyGroup, listMemories } from '@/shared/api';
@@ -42,6 +42,8 @@ export function PhotoListPage() {
   // 필터 state
   const [year, setYear] = useState('');
   const [authorId, setAuthorId] = useState('');
+  const [isYearOpen, setIsYearOpen] = useState(false);
+  const [isAuthorOpen, setIsAuthorOpen] = useState(false);
 
   // 삭제 모달 state
   const [deleteTarget, setDeleteTarget] = useState<MemoryResponse | null>(null);
@@ -116,16 +118,26 @@ export function PhotoListPage() {
 
           {/* 필터 pills */}
           <div className='flex items-center gap-2'>
-            <Select
-              options={YEAR_OPTIONS}
-              value={year}
-              onChange={setYear}
-            />
-            <Select
-              options={authorOptions}
-              value={authorId}
-              onChange={setAuthorId}
-            />
+            <button
+              type="button"
+              onClick={() => setIsYearOpen(true)}
+              className="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 typography-body-lg text-text-primary"
+            >
+              <span>{year ? YEAR_OPTIONS.find(o => o.value === year)?.label : '전체 기간'}</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAuthorOpen(true)}
+              className="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 typography-body-lg text-text-primary"
+            >
+              <span>{authorId ? authorOptions.find(o => o.value === authorId)?.label : '전체 작성자'}</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -186,6 +198,23 @@ export function PhotoListPage() {
           onSuccess={() => { setDeleteTarget(null); fetchMemories(); }}
         />
       )}
+
+      {/* ── 바텀 시트 필터 ───────────────────────────────────── */}
+      <YearSelectSheet
+        isOpen={isYearOpen}
+        onClose={() => setIsYearOpen(false)}
+        selectedYear={year}
+        onSelect={setYear}
+        showAllTime
+      />
+      
+      <AuthorSelectSheet
+        isOpen={isAuthorOpen}
+        onClose={() => setIsAuthorOpen(false)}
+        options={authorOptions}
+        selectedAuthor={authorId}
+        onSelect={setAuthorId}
+      />
     </div>
   );
 }

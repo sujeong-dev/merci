@@ -1,5 +1,4 @@
 import { cn } from '@/shared/lib/utils';
-import { ChevronRightIcon } from '@/shared/ui/icons';
 import { MouseEventHandler } from 'react';
 
 /**
@@ -34,9 +33,6 @@ const cardInner = (icon: React.ReactNode, title: string, subtitle: string) => (
       <span className="typography-h3 text-text-primary">{title}</span>
       <span className="typography-body-sm text-text-body">{subtitle}</span>
     </div>
-
-    {/* 우측 화살표 — 피그마 chevron(8×12, #D1D5DB) */}
-    <ChevronRightIcon className="shrink-0 text-[#D1D5DB]" />
   </>
 );
 

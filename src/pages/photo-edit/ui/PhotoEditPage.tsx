@@ -3,8 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { Button, Input, PageHeader, Select, ProgressBar, Spinner } from '@/shared/ui';
-import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon } from '@/shared/ui/icons';
+import { Button, Input, PageHeader, ProgressBar, Spinner, YearSelectSheet } from '@/shared/ui';
+import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon } from '@/shared/ui/icons';
 import { useMemoryEdit, formatDuration } from '@/features/memory-edit/model/useMemoryEdit';
 import { getMemory } from '@/shared/api';
 import type { MemoryResponse } from '@/shared/api';
@@ -54,6 +54,7 @@ export function PhotoEditPage() {
 function EditForm({ memory }: { memory: MemoryResponse }) {
   const router = useRouter();
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const [isYearOpen, setIsYearOpen] = useState(false);
 
   const {
     title, setTitle,
@@ -118,7 +119,16 @@ function EditForm({ memory }: { memory: MemoryResponse }) {
 
         <div className="flex flex-col gap-3">
           <span className="typography-body-sm-bold pl-1 text-text-subtle">사진 연도</span>
-          <Select options={YEAR_OPTIONS} value={year} onChange={setYear} />
+          <button
+            type="button"
+            onClick={() => setIsYearOpen(true)}
+            className="flex w-full items-center justify-between rounded-xl border border-border-default bg-white px-4 py-3 text-left transition-colors hover:bg-[#F9FAFB] active:bg-[#F3F4F6]"
+          >
+            <span className="typography-body-lg text-text-primary">
+              {year ? `${year}년` : '연도를 선택하세요'}
+            </span>
+            <ChevronDownIcon size={20} className="text-text-tertiary" />
+          </button>
         </div>
 
         <Input id="edit-location" label="사진 장소" placeholder="예: 경복궁 앞" value={location} onChange={(e) => setLocation(e.target.value)} />
@@ -228,6 +238,14 @@ function EditForm({ memory }: { memory: MemoryResponse }) {
           ) : '저장하기'}
         </Button>
       </div>
+
+      <YearSelectSheet
+        isOpen={isYearOpen}
+        onClose={() => setIsYearOpen(false)}
+        selectedYear={year || ''}
+        onSelect={setYear}
+        showAllTime={false}
+      />
     </div>
   );
 }

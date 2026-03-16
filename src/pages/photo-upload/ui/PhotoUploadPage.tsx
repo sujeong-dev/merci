@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Button, Input, PageHeader, Select, ProgressBar } from '@/shared/ui';
-import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon } from '@/shared/ui/icons';
+import { Button, Input, PageHeader, ProgressBar, YearSelectSheet } from '@/shared/ui';
+import { AddPictureIcon, MicIcon, StopIcon, PlayIcon, PauseIcon, ChevronDownIcon } from '@/shared/ui/icons';
 import { usePhotoUpload, formatDuration } from '@/features/photo-upload/model/usePhotoUpload';
 
 // 연도 옵션 (현재 연도 ~ 1900, 기본값은 현재 연도)
@@ -18,6 +18,7 @@ const MAX_RECORDING_SECONDS = 300;
 
 export function PhotoUploadPage() {
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const [isYearOpen, setIsYearOpen] = useState(false);
 
   const {
     title, setTitle,
@@ -112,11 +113,16 @@ export function PhotoUploadPage() {
         {/* 사진 연도 */}
         <div className="flex flex-col gap-3">
           <span className="typography-body-sm-bold pl-1 text-text-subtle">사진 연도</span>
-          <Select
-            options={YEAR_OPTIONS}
-            value={year}
-            onChange={setYear}
-          />
+          <button
+            type="button"
+            onClick={() => setIsYearOpen(true)}
+            className="flex w-full items-center justify-between rounded-xl border border-border-default bg-white px-4 py-3 text-left transition-colors hover:bg-[#F9FAFB] active:bg-[#F3F4F6]"
+          >
+            <span className="typography-body-lg text-text-primary">
+              {year ? `${year}년` : '연도를 선택하세요'}
+            </span>
+            <ChevronDownIcon size={20} className="text-text-tertiary" />
+          </button>
         </div>
 
         {/* 사진 장소 */}
@@ -274,6 +280,13 @@ export function PhotoUploadPage() {
         </Button>
       </div>
 
+      <YearSelectSheet
+        isOpen={isYearOpen}
+        onClose={() => setIsYearOpen(false)}
+        selectedYear={year}
+        onSelect={setYear}
+        showAllTime={false}
+      />
     </div>
   );
 }

@@ -9,19 +9,9 @@ export function ChevronRightIcon({ size = 12, className }: ChevronRightIconProps
   const width = Math.round((size * 8) / 12);
 
   return (
-    <svg
-      width={width}
-      height={size}
-      viewBox="0 0 8 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      <path
-        d="M4.6 6L0 1.4L1.4 0L7.4 6L1.4 12L0 10.6L4.6 6Z"
-        fill="currentColor"
-      />
-    </svg>
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.51351 0L11 7L4.51351 14L3 12.3667L7.97297 7L3 1.63333L4.51351 0Z" fill="currentColor"/>
+</svg>
+
   );
 }

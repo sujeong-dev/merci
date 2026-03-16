@@ -22,3 +22,6 @@ export { CommentInput } from './CommentInput';
 export { Spinner } from './Spinner';
 export { QuizOptionButton } from './QuizOptionButton';
 export type { QuizOptionButtonProps } from './QuizOptionButton';
+export { YearSelectSheet } from './YearSelectSheet';
+export { AuthorSelectSheet } from './AuthorSelectSheet';
+export type { AuthorOption } from './AuthorSelectSheet';
