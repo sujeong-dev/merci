@@ -9,6 +9,7 @@ export interface QuizQuestion {
   question: string;
   options: string[] | null;      // null → 주관식, string[4] → 객관식
   correct_answer: string;
+  audio_url?: string | null;     // 생성된 TTS 오디오 파일 URL
 }
 
 export interface QuizGenerateResponse {
@@ -17,9 +18,9 @@ export interface QuizGenerateResponse {
 }
 
 export interface QuizSubmitRequest {
-  score_1: number;  // WHEN (0 | 1)
-  score_2: number;  // WHERE (0 | 1)
-  score_3: number;  // WHO (0 | 1 | 3)
+  score_1: number;  // WHERE (0 | 1)
+  score_2: number;  // WHO (0 | 1)
+  score_3: number;  // WHEN (0 | 1 | 3)
   score_4: number;  // WHAT (0 | 2 | 5)
 }
 

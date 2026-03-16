@@ -78,7 +78,7 @@ export const useQuizPlay = ({ memoryId, onComplete }: UseQuizPlayParams) => {
         return selectedOptions[index] === q.correct_answer ? 1 : 0;
       } else {
         const rating = ratings[index];
-        if (q.question_type === 'WHO') {
+        if (q.question_type === 'WHEN') {
           return rating === 'perfect' ? 3 : rating === 'similar' ? 1 : 0;
         } else if (q.question_type === 'WHAT') {
           return rating === 'perfect' ? 5 : rating === 'similar' ? 2 : 0;

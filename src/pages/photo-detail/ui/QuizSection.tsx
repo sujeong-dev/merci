@@ -1,5 +1,8 @@
 import { Button, QuizOptionButton, Spinner } from '@/shared/ui';
+import { SpeakerIcon } from '@/shared/ui/icons';
 import { useQuizPlay } from '@/features/quiz-play/model/useQuizPlay';
+import { useTTS } from '@/shared/lib/hooks/useTTS';
+import { useEffect } from 'react';
 
 interface QuizSectionProps {
   memoryId: string;
@@ -31,6 +34,13 @@ export function QuizSection({ memoryId, onComplete }: QuizSectionProps) {
     onComplete: (result) => onComplete(result.total_score),
   });
 
+  const { play, stop, isPlaying } = useTTS();
+
+  // Stop TTS when question changes or component unmounts
+  useEffect(() => {
+    stop();
+  }, [currentQuestion, stop]);
+
   if (isGenerating) {
     return (
       <div className="flex flex-col items-center justify-center py-10 bg-white rounded-[10px] p-5 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.04)]">
@@ -54,9 +64,23 @@ export function QuizSection({ memoryId, onComplete }: QuizSectionProps) {
       </div>
 
       {/* Question Text */}
-      <h2 className="typography-body-lg-bold text-[#111827] whitespace-pre-line mb-6 break-keep">
-        {currentQuestion.question}
-      </h2>
+      <div className="flex items-start gap-2 mb-6">
+        <h2 className="typography-body-lg-bold text-[#111827] whitespace-pre-line break-keep flex-1">
+          {currentQuestion.question}
+        </h2>
+        {currentQuestion.audio_url && (
+          <button
+            type="button"
+            aria-label="문제 듣기"
+            onClick={() => play(currentQuestion.audio_url)}
+            className={`flex size-10 items-center justify-center shrink-0 rounded-full transition-colors ${
+              isPlaying ? 'bg-primary-soft text-white' : 'bg-[#F3F4F6] text-text-tertiary'
+            }`}
+          >
+            <SpeakerIcon size={20} />
+          </button>
+        )}
+      </div>
 
       {/* Options & Feedback */}
       <div className="flex-1 flex flex-col justify-between">
